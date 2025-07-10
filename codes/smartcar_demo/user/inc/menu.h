@@ -5,6 +5,7 @@
 
 int menu1(void);
 int menu2_1(void);
-void ips200_display_graph(void);
+int menu2_2(void);
+extern uint8 image_ready_flag;
 
 #endif

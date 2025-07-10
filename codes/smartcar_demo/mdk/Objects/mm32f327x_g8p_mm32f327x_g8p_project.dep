@@ -1,6 +1,6 @@
 Dependencies for Project 'mm32f327x_g8p', Target 'mm32f327x_g8p_project': (DO NOT MODIFY !)
-F (..\USER\src\main.c)(0x68663978)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/main.o -MD)
-I (..\..\libraries\zf_common\zf_common_headfile.h)(0x67B759CC)
+F (..\USER\src\main.c)(0x686E68E0)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/main.o -MD)
+I (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
@@ -88,10 +88,13 @@ I (..\..\libraries\zf_device\zf_device_wifi_uart.h)(0x67B759CC)
 I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x67B759CC)
-I (..\user\inc\menu.h)(0x68663709)
-F (..\user\src\isr.c)(0x63E3191A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/isr.o -MD)
+I (..\user\inc\otsu.h)(0x686CCD7F)
+I (..\user\inc\menu.h)(0x686E1910)
+I (..\user\inc\motor.h)(0x686C8ADD)
 I (..\user\inc\isr.h)(0x62FB49A8)
-I (..\..\libraries\zf_common\zf_common_headfile.h)(0x67B759CC)
+F (..\user\src\isr.c)(0x686C8CF6)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/isr.o -MD)
+I (..\user\inc\isr.h)(0x62FB49A8)
+I (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
@@ -179,8 +182,11 @@ I (..\..\libraries\zf_device\zf_device_wifi_uart.h)(0x67B759CC)
 I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x67B759CC)
-F (..\user\src\menu.c)(0x68663C4A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/menu.o -MD)
-I (..\..\libraries\zf_common\zf_common_headfile.h)(0x67B759CC)
+I (..\user\inc\otsu.h)(0x686CCD7F)
+I (..\user\inc\menu.h)(0x686E1910)
+I (..\user\inc\motor.h)(0x686C8ADD)
+F (..\user\src\menu.c)(0x686E2030)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/menu.o -MD)
+I (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
@@ -268,10 +274,11 @@ I (..\..\libraries\zf_device\zf_device_wifi_uart.h)(0x67B759CC)
 I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x67B759CC)
-I (..\user\inc\menu.h)(0x68663709)
-I (..\user\inc\otsu.h)(0x68661513)
-F (..\user\src\otsu.c)(0x68661513)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/otsu.o -MD)
-I (..\..\libraries\zf_common\zf_common_headfile.h)(0x67B759CC)
+I (..\user\inc\otsu.h)(0x686CCD7F)
+I (..\user\inc\menu.h)(0x686E1910)
+I (..\user\inc\motor.h)(0x686C8ADD)
+F (..\user\src\otsu.c)(0x686E4D3D)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/otsu.o -MD)
+I (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
@@ -359,10 +366,106 @@ I (..\..\libraries\zf_device\zf_device_wifi_uart.h)(0x67B759CC)
 I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ffconf.h)(0x67B759CC)
 I (..\..\libraries\components\fatfs\source\ff.h)(0x67B759CC)
-I (..\user\inc\OTSU.h)(0x68661513)
+I (..\user\inc\otsu.h)(0x686CCD7F)
+I (..\user\inc\menu.h)(0x686E1910)
+I (..\user\inc\motor.h)(0x686C8ADD)
+F (..\user\src\motor.c)(0x686FB3BD)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/motor.o -MD)
+I (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x588CAFD2)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x588CAFD2)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
+I (..\..\libraries\sdk\hal_device_registers.h)(0x67B759CC)
+I (..\..\libraries\sdk\mm32f3277g.h)(0x67B759CC)
+I (..\..\libraries\sdk\CMSIS\Include\core_cm3.h)(0x67B759CC)
+I (..\..\libraries\sdk\CMSIS\Include\cmsis_version.h)(0x67B759CC)
+I (..\..\libraries\sdk\CMSIS\Include\cmsis_compiler.h)(0x67B759CC)
+I (..\..\libraries\sdk\CMSIS\Include\cmsis_armclang_ltm.h)(0x67B759CC)
+I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x57FC022C)
+I (..\..\libraries\sdk\mm32f3277g_features.h)(0x67B759CC)
+I (..\..\libraries\sdk\system_mm32f3277g.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_common.h)(0x67B759CC)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x588CAFD2)
+I (..\..\libraries\sdk\drivers\hal_adc.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_comp.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_dac.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_dma.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_dma_request.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_exti.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_fsmc.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_gpio.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_i2c.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_iwdg.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_rcc.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_rtc.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_sdio.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_spi.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_syscfg.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_tim_16b.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_tim_32b.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_tim_adv.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_tim_basic.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_uart.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_usb.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_usb_bdt.h)(0x67B759CC)
+I (..\..\libraries\sdk\drivers\hal_wwdg.h)(0x67B759CC)
+I (..\..\libraries\zf_common\zf_common_typedef.h)(0x67B759CC)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x588CAFD0)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x588CAFDA)
+I (..\..\libraries\zf_common\zf_common_clock.h)(0x67B759CC)
+I (..\..\libraries\zf_common\zf_common_debug.h)(0x67B759CC)
+I (..\..\libraries\zf_common\zf_common_fifo.h)(0x67B759CC)
+I (..\..\libraries\zf_common\zf_common_font.h)(0x685C38E2)
+I (..\..\libraries\zf_common\zf_common_function.h)(0x67B759CC)
+I (..\..\libraries\zf_common\zf_common_interrupt.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_adc.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_delay.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_encoder.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_exti.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_gpio.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_flash.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_iic.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_pit.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_pwm.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_sdio.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_soft_iic.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_soft_spi.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_spi.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_timer.h)(0x67B759CC)
+I (..\..\libraries\zf_driver\zf_driver_uart.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_absolute_encoder.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_bluetooth_ch9141.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_camera.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_dl1a.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_dm1xa.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_gps_tau1201.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_icm20602.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_imu660ra.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_imu963ra.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_ips114.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_ips200.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_key.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_mpu6050.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_mt9v03x.h)(0x685C3A35)
+I (..\..\libraries\zf_device\zf_device_oled.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_ov7725.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_scc8660.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_sdcard.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_tft180.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_tsl1401.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_type.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_virtual_oscilloscope.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_wifi_uart.h)(0x67B759CC)
+I (..\..\libraries\zf_device\zf_device_wireless_uart.h)(0x67B759CC)
+I (..\..\libraries\components\fatfs\source\ffconf.h)(0x67B759CC)
+I (..\..\libraries\components\fatfs\source\ff.h)(0x67B759CC)
+I (..\user\inc\otsu.h)(0x686CCD7F)
+I (..\user\inc\menu.h)(0x686E1910)
+I (..\user\inc\motor.h)(0x686C8ADD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\math.h)(0x58A47FFE)
 F (..\user\inc\isr.h)(0x62FB49A8)()
-F (..\user\inc\menu.h)(0x68663709)()
-F (..\user\inc\otsu.h)(0x68661513)()
+F (..\user\inc\menu.h)(0x686E1910)()
+F (..\user\inc\otsu.h)(0x686CCD7F)()
+F (..\user\inc\motor.h)(0x686C8ADD)()
 F (..\..\libraries\doc\version.txt)(0x67B759CC)()
 F (..\..\libraries\zf_common\zf_common_clock.c)(0x67B759CC)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/zf_common_clock.o -MD)
 I (..\..\libraries\zf_common\zf_common_function.h)(0x67B759CC)
@@ -461,7 +564,7 @@ I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x588CAFD0)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x588CAFDA)
 F (..\..\libraries\zf_common\zf_common_interrupt.h)(0x67B759CC)()
-F (..\..\libraries\zf_common\zf_common_headfile.h)(0x67B759CC)()
+F (..\..\libraries\zf_common\zf_common_headfile.h)(0x68663CBE)()
 F (..\..\libraries\zf_common\zf_common_typedef.h)(0x67B759CC)()
 F (..\..\libraries\zf_driver\zf_driver_adc.c)(0x67B759CC)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/zf_driver_adc.o -MD)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x67B759CC)
@@ -526,7 +629,7 @@ I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x588CAFD2)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x588CAFDA)
 I (..\..\libraries\zf_driver\zf_driver_dma.h)(0x67B759CC)
 F (..\..\libraries\zf_driver\zf_driver_dma.h)(0x67B759CC)()
-F (..\..\libraries\zf_driver\zf_driver_encoder.c)(0x67B759CC)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/zf_driver_encoder.o -MD)
+F (..\..\libraries\zf_driver\zf_driver_encoder.c)(0x686E245B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -fsigned-char -fshort-enums -fshort-wchar-D__MICROLIB -gdwarf-3 -O3 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../user/inc -I ../code -I ../../libraries/zf_common -I ../../libraries/zf_device -I ../../libraries/zf_driver -I ../../libraries/sdk -I ../../libraries/sdk/CMSIS/Include -I ../../libraries/sdk/drivers -I ../../libraries/components/fatfs/source-I./RTE/_mm32f327x_g8p_project-IC:/Keil_v5/ARM/PACK/MindMotion/MM32F3270_DFP/1.1.8/Device/MM32F327x/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="524" -DMM32F3273G8P-o ./objects/zf_driver_encoder.o -MD)
 I (..\..\libraries\sdk\hal_device_registers.h)(0x67B759CC)
 I (..\..\libraries\sdk\mm32f3277g.h)(0x67B759CC)
 I (..\..\libraries\sdk\CMSIS\Include\core_cm3.h)(0x67B759CC)

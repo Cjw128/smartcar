@@ -1,6 +1,8 @@
 #include "zf_common_headfile.h"
 #include "menu.h"
 #include "otsu.h"
+#include "motor.h"
+#include "zf_driver_pit.h"
 int menu1(void)
 {
     int k1 = 0, k2 = 0, k3 = 0;
@@ -80,7 +82,8 @@ int menu2_1(void)
             k4 = 1;
 		if (mt9v03x_finish_flag)
         {
-            ips200_display_graph();
+//            ips200_display_graph();
+					image_process();
             mt9v03x_finish_flag = 0;
         }
         // 按KEY3确认操作，演示用，直接返回1（或你自定义）
@@ -112,12 +115,56 @@ int menu2_1(void)
         system_delay_ms(100);
     }
 }
-
-uint8 image1[MT9V03X_W * MT9V03X_H];
-void ips200_display_graph()
+uint8 image_ready_flag = 0;
+int menu2_2(void)
 {
-    memcpy(image1, mt9v03x_image, MT9V03X_W * MT9V03X_H);
-    highlight_processing((uint8*)image1,MT9V03X_W,MT9V03X_H,235);
-    uint8 threshold = otsu_find_threshold((uint8*)image1,MT9V03X_W,MT9V03X_H);
-    ips200_show_gray_image(0, 0, (const uint8 *)image1, MT9V03X_W, MT9V03X_H, 240, 180, threshold);
+    ips200_clear();
+    ips200_show_string(0, 240, "Press KEY_3 to confirm");
+    ips200_show_string(0, 260, "Press KEY_4 to go back");
+
+    int k3 = 0;
+    int k4 = 0;
+		pit_init(TIM6_PIT,2400000);                  // 初始化 20ms 周期定时器
+    while (1)
+    {
+					if (image_ready_flag)
+    {
+        image_ready_flag = 0;
+        image_process();  // 在主循环处理图像，避免中断卡死
+    }
+			key_scanner();
+
+        if (key_get_state(KEY_3) == KEY_SHORT_PRESS)
+            k3 = 1;
+        if (key_get_state(KEY_4) == KEY_SHORT_PRESS)
+            k4 = 1;
+			
+
+        if (k3)
+        {
+            system_delay_ms(10);
+            while (key_get_state(KEY_3) != KEY_RELEASE)
+            {
+                key_scanner();
+                system_delay_ms(10);
+            }
+            system_delay_ms(10);
+            return 1;  // 比如确认返回1
+        }
+
+        // 按KEY4返回上一级菜单
+        if (k4)
+        {
+            system_delay_ms(10);
+            while (key_get_state(KEY_4) != KEY_RELEASE)
+            {
+                key_scanner();
+                system_delay_ms(10);
+            }
+            system_delay_ms(10);
+            return 0;  // 返回0表示返回上一级
+        }
+
+        system_delay_ms(100);
+    }
 }

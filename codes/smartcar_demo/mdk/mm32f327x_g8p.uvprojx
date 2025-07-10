@@ -400,6 +400,11 @@
               <FileType>1</FileType>
               <FilePath>..\user\src\otsu.c</FilePath>
             </File>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\src\motor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -419,6 +424,11 @@
               <FileName>otsu.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\inc\otsu.h</FilePath>
+            </File>
+            <File>
+              <FileName>motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\inc\motor.h</FilePath>
             </File>
           </Files>
         </Group>
