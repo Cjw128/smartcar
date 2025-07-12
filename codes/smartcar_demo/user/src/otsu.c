@@ -571,8 +571,7 @@ example： image_process();
 void image_process(void)
 {
 uint16 i;
-uint8 hightest = 0;//定义一个最高行，tip：这里的最高指的是y值的最小
-/*这是离线调试用的*/
+uint8 hightest = 0;
 Get_image(mt9v03x_image);
 highlight_processing(*original_image,image_w,image_h,250);
 turn_to_bin();
@@ -596,32 +595,31 @@ if (get_start_point(image_h - 2))//找到起点了，再执行八领域，没找
 
 extern void ips200_displayimage032_zoom(uint8 *img, uint16 src_w, uint16 src_h,
                                         uint16 dst_w, uint16 dst_h, uint16 x, uint16 y);
-
-	//根据最终循环次数画出边界点
-
-	for (i = 0; i < data_stastics_l; i++)
-	{
-		ips200_draw_point(points_l[i][0]+2, points_l[i][1], RGB565_BLUE);//显示起点
-	}
-	for (i = 0; i < data_stastics_r; i++)
-	{
-		ips200_draw_point(points_r[i][0]-2, points_r[i][1], RGB565_RED);//显示起点
-	}
-
-	for (i = hightest; i < image_h-1; i++)
-	{
-		center_line[i] = (l_border[i] + r_border[i]) >> 1;//求中线
-		//求中线最好最后求，不管是补线还是做状态机，全程最好使用一组边线，中线最后求出，不能干扰最后的输出
-		//当然也有多组边线的找法，但是个人感觉很繁琐，不建议
-		ips200_draw_point(center_line[i], i, RGB565_BLUE);//显示起点 显示中线	
-		ips200_draw_point(l_border[i], i, RGB565_GREEN);//显示起点 显示左边线
-		ips200_draw_point(r_border[i], i, RGB565_GREEN);//显示起点 显示右边线
-	}
-	//ips200_show_gray_image(0, 0, (const uint8 *)bin_image, MT9V03X_W, MT9V03X_H, 240, 180, 0);
+// 计算中线
+for (i = hightest; i < image_h - 1; i++)
+{
+    center_line[i] = (l_border[i] + r_border[i]) >> 1; // 中线是必须的
 }
 
 
+//    for (i = 0; i < data_stastics_l; i++)
+//        ips200_draw_point(points_l[i][0] + 2, points_l[i][1], RGB565_BLUE);
+
+//    for (i = 0; i < data_stastics_r; i++)
+//        ips200_draw_point(points_r[i][0] - 2, points_r[i][1], RGB565_RED);
+
+//    for (i = hightest; i < image_h - 1; i++)
+//    {
+//        ips200_draw_point(center_line[i], i, RGB565_BLUE);
+//        ips200_draw_point(l_border[i], i, RGB565_GREEN);
+//        ips200_draw_point(r_border[i], i, RGB565_GREEN);
+//    }
+
+    // 可选整图显示
+    // ips200_show_gray_image(0, 0, (const uint8 *)bin_image, MT9V03X_W, MT9V03X_H, 240, 180, 0);
 
 
+
+	}
 
 

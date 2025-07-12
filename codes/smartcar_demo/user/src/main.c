@@ -35,14 +35,13 @@
 
     #include "zf_common_headfile.h"
     #define IPS200_TYPE     (IPS200_TYPE_SPI)                                 // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
-                                                                                    // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
+    //#define ENABLE_IMAGE_DISPLAY 1  // 改成 1 就可以重新开启图像显示                                                                                // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
 
      #include "menu.h"
 		 #include "motor.h"
 		 #include "isr.h"
-    
+    volatile uint8 image_ready_flag = 0;
 // **************************** 代码区域 ****************************
-
 
 enum MenuState
 {
@@ -54,46 +53,57 @@ enum MenuState
 
 int main(void)
 {
-    clock_init(SYSTEM_CLOCK_120M);                                              // 初始化芯片时钟 工作频率为 120MHz
+    
+	clock_init(SYSTEM_CLOCK_120M);                                              // 初始化芯片时钟 工作频率为 120MHz
 	debug_init();                                                               // 初始化默认 Debug UART
     key_init(10);
     mt9v03x_init();
-    motor_init();
+	motor_init();
     encoder_init();
-    ips200_set_dir(IPS200_PORTAIT);
+  param_flash_read();  // 从Flash加载上次保存的参数
+		ips200_set_dir(IPS200_PORTAIT);
     ips200_set_color(RGB565_BLACK, RGB565_WHITE);
     ips200_init(IPS200_TYPE_SPI);
+		extern param_config_t params;
+    pit_ms_init(TIM6_PIT, 5);   	// 初始化 5ms 周期定时器
+    int current_menu = 1;  // 主菜单或初始菜单编号
+    int ret;
 
-    int current_menu = 1;
-    int menu2_ret = 0;
-    	pit_init(TIM6_PIT, 2400000);                  // 初始化 20ms 周期定时器
+    	
     while (1)
     {		
-//        if (current_menu == 1)
-//        {
-//            current_menu = menu1();
-//        }
-//        else if (current_menu == 2)
-//        {
-//            menu2_ret = menu2_1();
-//            if (menu2_ret == 0)  // 用户按KEY4返回上一级菜单
-//                current_menu = 1;
-//            else
-//                ; // 根据需要处理确认后的操作
-//        }
-//        else if (current_menu == 3)
-//        {
-//            menu2_ret = menu2_2();
-//            if (menu2_ret == 0)
-//            {
-//                current_menu = 1;
-//            }
-//            
-//        }
-//        system_delay_ms(100); // 减少CPU占用
 			
-			image_process();
+         switch (current_menu)
+        {
+            case 1:
+                // 这里调用普通菜单1
+                current_menu = menu1();  // 你的已有菜单函数
+                break;
+
+            case 2:
+                // 调用参数调节菜单
+                ret = menu_param_config();
+                // menu_param_config返回0时表示退出到主菜单
+                if (ret == 0)
+                {
+                    current_menu = 1;  // 返回主菜单
+                }
+                break;
+
+            // 其它菜单
+            case 3 :
+                ret = menu2_1();
+						
+						
+					
+                break;
+        }
+
+
+    
+
 			
     }
-}
 
+
+	}

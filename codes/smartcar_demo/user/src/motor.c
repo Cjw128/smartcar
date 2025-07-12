@@ -2,6 +2,7 @@
 #include "motor.h"
 #include "otsu.h"
 #include <math.h>
+#include "menu.h"
 /*****************************************编码器部分**********************************************/
 #define ENCODER_1                   (TIM3_ENCODER)
 #define ENCODER_1_A                 (TIM3_ENCODER_CH1_B4)
@@ -16,7 +17,7 @@
 int16 encoder_data_1 = 0;
 int16 encoder_data_2 = 0;
 /*****************************************编码器部分**********************************************/
-
+extern param_config_t params;  // 从菜单模块获取最新参数
 
 /******************************************电机部分**********************************************/
 #define MAX_DUTY            (40)                                             // 最大 MAX_DUTY% 占空比
@@ -26,33 +27,33 @@ int16 encoder_data_2 = 0;
 #define DIR_R               (A2 )
 #define PWM_R               (TIM5_PWM_CH4_A3)
 /******************************************电机部分**********************************************/
-int16 target_speed_L = 40;  // 左轮目标速度
-int16 target_speed_R = 40;  // 右轮目标速度
+//int16 target_speed_L = 40;  // 左轮目标速度
+//int16 target_speed_R = 40;  // 右轮目标速度
 												// 目标速度，单位：编码器计数 / 100ms（可理解为“速度”）
 //float Kp = 0.5f;                     // 比例系数，可调整
 int8 pwm_duty = 0;                  // 当前占空比（-50 ~ +50）
 
-float Kp_dir = 0.25f;        // 比例系数（调整方向控制灵敏度）
-float Kd_dir = 0.6f;        // 微分系数（控制震荡）
-float Kp_slope = 32.0f; 
-int16 base_speed = 32;      // 基础速度（根据调试调整）
+//float Kp_dir = 0.30f;        // 比例系数（调整方向控制灵敏度）
+//float Kd_dir = 0.34f;        // 微分系数（控制震荡）
+//float Kp_slope = 40.0f; 
+//int16 base_speed = 38;      // 基础速度（根据调试调整）
 
 int16 last_deviation = 0;   // 上一次偏差
 int16 last_slope = 0;
 
 int16 limit_a_b(int16 x, int a, int b);
-
+extern float Kp_dir, Kp_slope, Kd_dir;
 
 void motor_init(void)
 {
     // 初始化左电机方向引脚
     gpio_init(DIR_L, GPO, GPIO_HIGH, GPO_PUSH_PULL);
-    // 初始化左电机 PWM（17KHz，初始占空比 0）
+    // 初始化左电机 PWM（10KHz，初始占空比 0）
     pwm_init(PWM_L, 10000, 0);
 
     // 初始化右电机方向引脚
     gpio_init(DIR_R, GPO, GPIO_HIGH, GPO_PUSH_PULL);
-    // 初始化右电机 PWM（17KHz，初始占空比 0）
+    // 初始化右电机 PWM（10KHz，初始占空比 0）
     pwm_init(PWM_R, 10000, 0);
 }
 void encoder_init(void)
@@ -72,24 +73,24 @@ void set_motor_independent(int duty_L, int duty_R)
     if (duty_L >= 0)
     {
         gpio_set_level(DIR_L, GPIO_LOW);
-        pwm_set_duty(PWM_L, duty_L * 5000 / 100);
+        pwm_set_duty(PWM_L, duty_L * 4000 / 100);
     }
     else
     {
         gpio_set_level(DIR_L, GPIO_HIGH);
-        pwm_set_duty(PWM_L, -duty_L * 5000 / 100);
+        pwm_set_duty(PWM_L, -duty_L * 4000 / 100);
     }
 
     // 右电机
     if (duty_R >= 0)
     {
         gpio_set_level(DIR_R, GPIO_LOW);
-        pwm_set_duty(PWM_R, duty_R * 5000 / 100);
+        pwm_set_duty(PWM_R, duty_R * 4000 / 100);
     }
     else
     {
         gpio_set_level(DIR_R, GPIO_HIGH);
-        pwm_set_duty(PWM_R, -duty_R * 5000 / 100);
+        pwm_set_duty(PWM_R, -duty_R * 4000 / 100);
     }
 }
 extern uint8 center_line[image_h];  // 中线数组，图像处理生成
@@ -102,9 +103,9 @@ int16 limit_pwm(int16 x, int limit)
     if (x < -limit) return -limit;
     return x;
 }
-#define FIT_POINT_NUM 6
-#define FIT_START_ROW (image_h - 5)   // 稍微提前
-#define FIT_ROW_STEP 4                // 跨行大一点（拉长趋势线）
+#define FIT_POINT_NUM 8
+#define FIT_START_ROW (image_h - 16)   // 稍微提前
+#define FIT_ROW_STEP 2                // 跨行大一点（拉长趋势线）
 float get_center_slope(void)
 {
     int i, count = 0;
@@ -131,7 +132,7 @@ float get_center_slope(void)
     return k;
 }
 // 巡线闭环控制主函数（定时器中调用）
-#define SLOPE_GAIN 2.8f
+#define SLOPE_GAIN 2.0f
 void line_follow_control(void)
 {		
 	 if (loss_track(mt9v03x_image))  // 图像失踪，立即保护
@@ -140,7 +141,7 @@ void line_follow_control(void)
         return;
     }
     
-int current_row = image_h - 25;
+int current_row = image_h - 40;
 int16 center = center_line[current_row];
 int16 deviation = center - (image_w / 2);
 int16 diff = deviation - last_deviation;
@@ -151,51 +152,19 @@ float slope = get_center_slope();
 
 // 组合PD控制：横向偏差 + 趋势修正 + 微分
 float pid_output =
-    Kp_dir * deviation
-  - Kp_slope * (SLOPE_GAIN * slope + SLOPE_GAIN * slope * fabsf(slope))
-  + Kd_dir * diff;
-
-int16 speed_L = limit_pwm(base_speed + pid_output, MAX_DUTY);
-int16 speed_R = limit_pwm(base_speed - pid_output, MAX_DUTY);
+    params.Kp_dir * deviation
+  - params.Kp_slope * (SLOPE_GAIN * slope + SLOPE_GAIN * slope * fabsf(slope))
+  + params.Kd_dir * diff;
+int16 speed_L = limit_pwm(params.base_speed + pid_output, MAX_DUTY);
+int16 speed_R = limit_pwm(params.base_speed - pid_output, MAX_DUTY);
 
 set_motor_independent(speed_L, speed_R);
 }
 
-extern uint8 image_ready_flag;
+
 void pit_handler(void)
 {static uint8 frame_counter = 0;
 
-//    // 编码器测速
-//    static int16 last_encoder_1 = 0, last_encoder_2 = 0;
-//    int16 current_encoder_1 = encoder_get_count(ENCODER_1);
-//    int16 current_encoder_2 = encoder_get_count(ENCODER_2);
-//    int16 delta_encoder_1 = current_encoder_1 - last_encoder_1;
-//    int16 delta_encoder_2 = current_encoder_2 - last_encoder_2;
-//    last_encoder_1 = current_encoder_1;
-//    last_encoder_2 = current_encoder_2;
-
-//    // 减少串口干扰
-//    static uint8 print_counter = 0;
-//    if (++print_counter >= 10)
-//    {
-//        print_counter = 0;
-//        printf("ENC1: %d\tENC2: %d\r\n", delta_encoder_1, delta_encoder_2);
-//    }
-
     
- // 图像采集完成后再处理（避免撕裂）
-    
-  if (++frame_counter >= 3)
-    {
-        frame_counter = 0;
-        image_ready_flag = 1;  // 通知主循环去处理图像
-    }
-
-    line_follow_control();  // 控制函数
-    
-    
+		line_follow_control();
 }
-
-
-
-

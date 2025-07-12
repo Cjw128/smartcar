@@ -6,6 +6,21 @@
 int menu1(void);
 int menu2_1(void);
 int menu2_2(void);
-extern uint8 image_ready_flag;
+
+int menu_param_config(void);
+typedef struct
+{
+    float Kp_dir;
+    float Kp_slope;
+    float Kd_dir;
+    float base_speed;
+    float target_speed;
+} param_config_t;
+
+extern param_config_t params;
+
+void param_flash_write(void);
+void param_flash_read(void);
+int menu_param_config(void);
 
 #endif
