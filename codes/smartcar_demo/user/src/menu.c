@@ -69,7 +69,9 @@ int menu2_1(void)
     
     while (1)
     {
-       image_process();
+      image_process();
+			
+			
     }
 }
 int menu2_2(void)

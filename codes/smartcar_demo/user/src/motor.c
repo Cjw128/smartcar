@@ -131,6 +131,20 @@ float get_center_slope(void)
     float k = (count * sum_xy - sum_x * sum_y) / (count * sum_yy - sum_y * sum_y + 1e-6f);  // 避免除 0
     return k;
 }
+float gyro_z_offset = 0.0f;
+
+void calibrate_gyro_offset(void)
+{
+    int32 sum = 0;
+    for (int i = 0; i < 100; i++)
+    {
+        mpu6050_get_gyro();
+        sum += mpu6050_gyro_z;
+        system_delay_ms(10);  // 总共约 1 秒
+    }
+    gyro_z_offset = mpu6050_gyro_transition(sum / 100);
+    printf("Gyro Z offset = %.6f\n", gyro_z_offset);
+}
 // 巡线闭环控制主函数（定时器中调用）
 #define SLOPE_GAIN 2.0f
 void line_follow_control(void)
@@ -141,20 +155,36 @@ void line_follow_control(void)
         return;
     }
     
-int current_row = image_h - 40;
-int16 center = center_line[current_row];
+int16 sum = 0, valid_count = 0;
+int start_row = image_h - 40;
+
+for (int i = 0; i < 15; i++)
+{
+    int row = start_row + i;
+    if (row >= image_h) break;  // 防止越界
+
+    int c = center_line[row];
+    if (c > 5 && c < image_w - 5)  // 排除异常值
+    {
+        sum += c;
+        valid_count++;
+    }
+}
+
+int16 center = (valid_count > 0) ? (sum / valid_count) : (image_w / 2);
 int16 deviation = center - (image_w / 2);
 int16 diff = deviation - last_deviation;
 last_deviation = deviation;
-
+mpu6050_get_gyro();  // 每次更新角速度
+float gyro_z_dps = -mpu6050_gyro_transition(mpu6050_gyro_z) + gyro_z_offset;  // 转为 °/s 单位
 // 趋势斜率
-float slope = get_center_slope();
-
+//float slope = get_center_slope();
+printf("gyroz = %f\n",gyro_z_dps);
 // 组合PD控制：横向偏差 + 趋势修正 + 微分
 float pid_output =
-    params.Kp_dir * deviation
-  - params.Kp_slope * (SLOPE_GAIN * slope + SLOPE_GAIN * slope * fabsf(slope))
-  + params.Kd_dir * diff;
+    params.Kp_dir * deviation*fabs(deviation)/10
+  /*- params.Kp_slope * (SLOPE_GAIN * slope + SLOPE_GAIN * slope * fabsf(slope))*/
+  + params.Kd_dir * gyro_z_dps;
 int16 speed_L = limit_pwm(params.base_speed + pid_output, MAX_DUTY);
 int16 speed_R = limit_pwm(params.base_speed - pid_output, MAX_DUTY);
 
