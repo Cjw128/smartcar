@@ -11,10 +11,12 @@ int menu_param_config(void);
 typedef struct
 {
     float Kp_dir;
-    float Kp_slope;
+    float kp_speed;
     float Kd_dir;
     float base_speed;
     float target_speed;
+    float ki_speed;
+    float kd_speed;
 } param_config_t;
 
 extern param_config_t params;

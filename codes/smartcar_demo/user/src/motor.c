@@ -20,7 +20,7 @@ int16 encoder_data_2 = 0;
 extern param_config_t params;  // 从菜单模块获取最新参数
 
 /******************************************电机部分**********************************************/
-#define MAX_DUTY            (40)                                             // 最大 MAX_DUTY% 占空比
+#define MAX_DUTY            (50)                                             // 最大 MAX_DUTY% 占空比
 #define DIR_L               (A0 )
 #define PWM_L               (TIM5_PWM_CH2_A1)
 
@@ -103,49 +103,55 @@ int16 limit_pwm(int16 x, int limit)
     if (x < -limit) return -limit;
     return x;
 }
-#define FIT_POINT_NUM 8
-#define FIT_START_ROW (image_h - 16)   // 稍微提前
-#define FIT_ROW_STEP 2                // 跨行大一点（拉长趋势线）
-float get_center_slope(void)
+
+#define OFFSET -6.524390
+// 定义静态变量用于滤波状态
+static float gyro_z_filtered = 0.0f;
+
+// 滤波系数（0~1，越大越快，越小越稳，建议 0.1~0.3）
+#define GYRO_FILTER_ALPHA  0.15f
+
+// 角速度滤波函数（返回滤波后的结果）
+float get_filtered_gyro_z(float raw_gyro_z_dps)
 {
-    int i, count = 0;
-    float sum_x = 0, sum_y = 0, sum_xy = 0, sum_yy = 0;
-
-    for (i = 0; i < FIT_POINT_NUM; i++)
-    {
-        int y = FIT_START_ROW - i * FIT_ROW_STEP;
-        if (y < 0 || y >= image_h) continue;  // 防越界
-
-        int x = center_line[y];
-        if (x <= 5 || x >= image_w - 5) continue;  // 过滤无效点
-
-        sum_x += x;
-        sum_y += y;
-        sum_xy += x * y;
-        sum_yy += y * y;
-        count++;
-    }
-
-    if (count < 3) return 0;  // 有效点太少，认为趋势无偏斜
-
-    float k = (count * sum_xy - sum_x * sum_y) / (count * sum_yy - sum_y * sum_y + 1e-6f);  // 避免除 0
-    return k;
-}
-float gyro_z_offset = 0.0f;
-
-void calibrate_gyro_offset(void)
-{
-    int32 sum = 0;
-    for (int i = 0; i < 100; i++)
-    {
-        mpu6050_get_gyro();
-        sum += mpu6050_gyro_z;
-        system_delay_ms(10);  // 总共约 1 秒
-    }
-    gyro_z_offset = mpu6050_gyro_transition(sum / 100);
-    printf("Gyro Z offset = %.6f\n", gyro_z_offset);
+    gyro_z_filtered = (1.0f - GYRO_FILTER_ALPHA) * gyro_z_filtered
+                    + GYRO_FILTER_ALPHA * raw_gyro_z_dps;
+    return gyro_z_filtered;
 }
 // 巡线闭环控制主函数（定时器中调用）
+float center_weighted_deviation(uint8 start, uint8 end)
+{
+    if (end < start)
+    {
+        uint8 temp = start;
+        start = end;
+        end = temp;
+    }
+
+    if (start >= image_h) start = image_h - 1;
+    if (end >= image_h) end = image_h - 1;
+
+    float sum = 0;
+    float weight_sum = 0;
+
+    for (int i = start; i <= end; i++)
+    {
+        uint8 c = center_line[i];
+        if (c > 5 && c < image_w - 5)  // 过滤异常值
+        {
+            float weight = i - start + 1;  // 行号越靠近底部，权重越大（例如从1开始累加）
+            float offset = (image_w / 2.0f) - c;
+
+            sum += offset * weight;
+            weight_sum += weight;
+        }
+    }
+
+    if (weight_sum > 0)
+        return sum / weight_sum;
+    else
+        return 0;  // 全部无效则偏移为0
+}
 #define SLOPE_GAIN 2.0f
 void line_follow_control(void)
 {		
@@ -154,47 +160,36 @@ void line_follow_control(void)
         set_motor_independent(0, 0);  // 停车
         return;
     }
-    
-int16 sum = 0, valid_count = 0;
-int start_row = image_h - 40;
 
-for (int i = 0; i < 15; i++)
-{
-    int row = start_row + i;
-    if (row >= image_h) break;  // 防止越界
+float deviation = center_weighted_deviation(image_h - 50, image_h -35);
 
-    int c = center_line[row];
-    if (c > 5 && c < image_w - 5)  // 排除异常值
-    {
-        sum += c;
-        valid_count++;
-    }
-}
-
-int16 center = (valid_count > 0) ? (sum / valid_count) : (image_w / 2);
-int16 deviation = center - (image_w / 2);
-int16 diff = deviation - last_deviation;
-last_deviation = deviation;
 mpu6050_get_gyro();  // 每次更新角速度
-float gyro_z_dps = -mpu6050_gyro_transition(mpu6050_gyro_z) + gyro_z_offset;  // 转为 °/s 单位
+float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;  // 转为 °/s 单位
+float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw)* 0.1f; 
 // 趋势斜率
 //float slope = get_center_slope();
-printf("gyroz = %f\n",gyro_z_dps);
+
 // 组合PD控制：横向偏差 + 趋势修正 + 微分
-float pid_output =
-    params.Kp_dir * deviation*fabs(deviation)/10
-  /*- params.Kp_slope * (SLOPE_GAIN * slope + SLOPE_GAIN * slope * fabsf(slope))*/
-  + params.Kd_dir * gyro_z_dps;
-int16 speed_L = limit_pwm(params.base_speed + pid_output, MAX_DUTY);
-int16 speed_R = limit_pwm(params.base_speed - pid_output, MAX_DUTY);
+float delta_speed =
+    params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f)) 
+  - params.Kd_dir * gyro_z_dps;
+int16 target_speed_L = limit_pwm(params.base_speed - delta_speed, MAX_DUTY);
+int16 target_speed_R = limit_pwm(params.base_speed + delta_speed, MAX_DUTY);
+set_motor_independent(target_speed_L,target_speed_R);
 
-set_motor_independent(speed_L, speed_R);
 }
-
+void speed_control(void)
+{
+    
+}
 
 void pit_handler(void)
 {static uint8 frame_counter = 0;
+           encoder_data_1 = encoder_get_count(ENCODER_1);                              // 获取编码器计数
+    encoder_clear_count(ENCODER_1);                                             // 清空编码器计数
 
-    
+    encoder_data_2 = encoder_get_count(ENCODER_2);                              // 获取编码器计数
+    encoder_clear_count(ENCODER_2);                                             // 清空编码器计数
+
 		line_follow_control();
 }
