@@ -62,16 +62,15 @@ int menu1(void)
         system_delay_ms(100);
     }
 }
-
+			extern uint8 flag_do_control;
 int menu2_1(void)
 {
     ips200_clear();
     
     while (1)
-    {
-      image_process();
-			
-			
+    {				      image_process();
+
+				
     }
 }
 int menu2_2(void)
@@ -126,11 +125,11 @@ int menu2_2(void)
 
 // 参数变量
 param_config_t params = {
-    .Kp_dir = 0.25f,
-    .kp_speed = 0.6f,
-    .Kd_dir = 0.4f,
-    .base_speed = 38.0f,
-    .target_speed = 40.0f,
+    .Kp_dir = 2.34f,
+    .kp_speed = 1.1f,
+    .Kd_dir = 1.24f,
+    .base_speed = 30.0f,
+    .target_speed = 50.0f,
     .ki_speed = 0.1f,
     .kd_speed = 0.05f,
 };
@@ -185,8 +184,8 @@ int menu_param_config(void)
         ips200_show_string(0, 100,  "Kp_dir       :");
         ips200_show_float(100, 100,  params.Kp_dir, 5, 2);
 
-        ips200_show_string(0, 120, "Kp_slope     :");
-        ips200_show_float(100, 120, params.Kp_slope, 5, 2);
+//        ips200_show_string(0, 120, "Kp_slope     :");
+//        ips200_show_float(100, 120, params.Kp_slope, 5, 2);
 
         ips200_show_string(0, 140, "Kd_dir       :");
         ips200_show_float(100, 140, params.Kd_dir, 5, 2);
@@ -230,12 +229,12 @@ int menu_param_config(void)
         {
             switch (selected)
             {
-                case PARAM_KP_DIR:        params.Kp_dir       += 0.05f; break;
-                case PARAM_KP_SLOPE:      params.Kp_slope     += 1.0f;  break;
-                case PARAM_KD_DIR:        params.Kd_dir       += 0.05f; break;
-                case PARAM_BASE_SPEED:   params.base_speed   += 1.0f;  break;
-                case PARAM_TARGET_SPEED: params.target_speed += 1.0f;  break;
-                case PARAM_KP_SPEED:     params.kp_speed     += 0.05f; break;
+                case PARAM_KP_DIR:        params.Kp_dir       += 0.2f; break;
+ //               case PARAM_KP_SLOPE:      params.Kp_slope     += 1.0f;  break;
+                case PARAM_KD_DIR:        params.Kd_dir       += 0.2f; break;
+                case PARAM_BASE_SPEED:   params.base_speed   += 10.0f;  break;
+                case PARAM_TARGET_SPEED: params.target_speed += 10.0f;  break;
+                case PARAM_KP_SPEED:     params.kp_speed     += 0.5f; break;
                 case PARAM_KI_SPEED:     params.ki_speed     += 0.02f; break;
                 case PARAM_KD_SPEED:     params.kd_speed     += 0.02f; break;
             }
@@ -247,12 +246,12 @@ int menu_param_config(void)
         {
             switch (selected)
             {
-                case PARAM_KP_DIR:        params.Kp_dir       -= 0.05f; break;
-                case PARAM_KP_SLOPE:      params.Kp_slope     -= 1.0f;  break;
-                case PARAM_KD_DIR:        params.Kd_dir       -= 0.05f; break;
-                case PARAM_BASE_SPEED:   params.base_speed   -= 1.0f;  break;
-                case PARAM_TARGET_SPEED: params.target_speed -= 1.0f;  break;
-                case PARAM_KP_SPEED:     params.kp_speed     -= 0.05f; break;
+                case PARAM_KP_DIR:        params.Kp_dir       -= 0.2f; break;
+//                case PARAM_KP_SLOPE:      params.Kp_slope     -= 1.0f;  break;
+                case PARAM_KD_DIR:        params.Kd_dir       -= 0.2f; break;
+                case PARAM_BASE_SPEED:   params.base_speed   -= 10.0f;  break;
+                case PARAM_TARGET_SPEED: params.target_speed -= 10.0f;  break;
+                case PARAM_KP_SPEED:     params.kp_speed     -= 0.5f; break;
                 case PARAM_KI_SPEED:     params.ki_speed     -= 0.02f; break;
                 case PARAM_KD_SPEED:     params.kd_speed     -= 0.02f; break;
             }

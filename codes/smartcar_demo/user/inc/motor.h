@@ -3,6 +3,10 @@
 
 #include "zf_common_headfile.h"
 
+extern int16 left_target_speed;
+extern int16 right_target_speed;
+extern int16 measured_speed_L;
+extern int16 measured_speed_R;
 
 void set_motor(int duty);
 void pit_handler(void);
