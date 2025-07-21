@@ -591,16 +591,166 @@ if (get_start_point(image_h - 2))//找到起点了，再执行八领域，没找
 
 }
 
+// ========== 环岛状态机 ==========
+//    static uint8 meetRingFlag = 0, enterRingFlag = 0, leaveRingFlag = 0, ringSide = 0;
+//    uint8 jumpFlagL = 0, jumpFlagR = 0, pointType = 0, pointSide = 0;
+//    uint16 pointX = 0, pointY = 0;
 
+//    for (i = image_h - 2; i > image_h / 3; i--)
+//    {
+//        if (l_border[i + 1] - l_border[i] > 20) // 左A跳变点
+//        {
+//            jumpFlagL = 1;
+//            pointX = l_border[i + 1];
+//            pointY = i + 1;
+//            pointSide = 1;
+//            pointType = 1;
+//        }
+//        else if (l_border[i] - l_border[i + 1] > 20) // 左V跳变点
+//        {
+//            jumpFlagL = 1;
+//            pointX = l_border[i];
+//            pointY = i;
+//            pointSide = 1;
+//            pointType = 2;
+//        }
+
+//        if (r_border[i] - r_border[i + 1] > 20) // 右A跳变点
+//        {
+//            jumpFlagR = 1;
+//            pointX = r_border[i + 1];
+//            pointY = i + 1;
+//            pointSide = 2;
+//            pointType = 1;
+//        }
+//        else if (r_border[i + 1] - r_border[i] > 20) // 右V跳变点
+//        {
+//            jumpFlagR = 1;
+//            pointX = r_border[i];
+//            pointY = i;
+//            pointSide = 2;
+//            pointType = 2;
+//        }
+
+//        if (jumpFlagL ^ jumpFlagR) break;
+//    }
+
+//    // 补线点
+//    uint16 topX = image_w / 2, topY = 0;
+//    uint16 l_bot_x = 0, l_bot_y = image_h - 1;
+//    uint16 r_bot_x = image_w - 1, r_bot_y = image_h - 1;
+//    float stepLength = 0;
+
+//    if (jumpFlagL ^ jumpFlagR)
+//    {
+//        if (pointType == 1) // A字跳变点
+//        {
+//            if (enterRingFlag)
+//            {
+//                leaveRingFlag = 1;
+//                if (ringSide == 1) // 左环补右边
+//                {
+//                    stepLength = (float)(topX - pointX) / (float)(topY - pointY);
+//                    for (i = 0; i < topY - pointY; i++)
+//                    {
+//                        r_border[topY - i] = topX - (int)(i * stepLength);
+//                        bin_image[topY - i][r_border[topY - i]] =
+//                        bin_image[topY - i][r_border[topY - i] - 1] =
+//                        bin_image[topY - i][r_border[topY - i] + 1] = 0;
+//                    }
+//                }
+//                else if (ringSide == 2) // 右环补左边
+//                {
+//                    stepLength = (float)(pointX - topX) / (float)(topY - pointY);
+//                    for (i = 0; i < topY - pointY; i++)
+//                    {
+//                        l_border[topY - i] = topX + (int)(i * stepLength);
+//                        bin_image[topY - i][l_border[topY - i]] =
+//                        bin_image[topY - i][l_border[topY - i] - 1] =
+//                        bin_image[topY - i][l_border[topY - i] + 1] = 0;
+//                    }
+//                }
+//            }
+//            else if (!meetRingFlag)
+//            {
+//                meetRingFlag = 1;
+//                ringSide = pointSide;
+//            }
+//        }
+//        else if (pointType == 2) // V字跳变点
+//        {
+//            if (leaveRingFlag) // 过环
+//            {
+//                meetRingFlag = 0;
+//                enterRingFlag = 0;
+//                leaveRingFlag = 0;
+//                if (ringSide == 1)
+//                {
+//                    stepLength = (float)(pointX - l_bot_x) / (float)(l_bot_y - pointY);
+//                    for (i = 0; i < l_bot_y - pointY; i++)
+//                    {
+//                        l_border[l_bot_y - i] = l_bot_x + (int)(i * stepLength);
+//                        bin_image[l_bot_y - i][l_border[l_bot_y - i]] =
+//                        bin_image[l_bot_y - i][l_border[l_bot_y - i] - 1] =
+//                        bin_image[l_bot_y - i][l_border[l_bot_y - i] + 1] = 0;
+//                    }
+//                }
+//                else if (ringSide == 2)
+//                {
+//                    stepLength = (float)(r_bot_x - pointX) / (float)(r_bot_y - pointY);
+//                    for (i = 0; i < r_bot_y - pointY; i++)
+//                    {
+//                        r_border[r_bot_y - i] = r_bot_x - (int)(i * stepLength);
+//                        bin_image[r_bot_y - i][r_border[r_bot_y - i]] =
+//                        bin_image[r_bot_y - i][r_border[r_bot_y - i] - 1] =
+//                        bin_image[r_bot_y - i][r_border[r_bot_y - i] + 1] = 0;
+//                    }
+//                }
+//            }
+//            else if (meetRingFlag) // 入环
+//{
+//    enterRingFlag = 1;
+
+//    if (ringSide == 1) // 左环：补右边线（右下 → 入环跳变点）
+//    {
+//        stepLength = (float)(r_bot_x - pointX) / (float)(r_bot_y - pointY);
+//        for (i = 0; i < r_bot_y - pointY; i++)
+//        {
+//            r_border[r_bot_y - i] = r_bot_x - (int)(i * stepLength);
+//            bin_image[r_bot_y - i][r_border[r_bot_y - i]] =
+//            bin_image[r_bot_y - i][r_border[r_bot_y - i] - 1] =
+//            bin_image[r_bot_y - i][r_border[r_bot_y - i] + 1] = 0;
+//        }
+//    }
+//    else if (ringSide == 2) // ✅ 右环：应补左边线（左下 → 入环跳变点）
+//    {
+//        stepLength = (float)(pointX - l_bot_x) / (float)(l_bot_y - pointY);
+//        for (i = 0; i < l_bot_y - pointY; i++)
+//        {
+//            l_border[l_bot_y - i] = l_bot_x + (int)(i * stepLength);
+//            bin_image[l_bot_y - i][l_border[l_bot_y - i]] =
+//            bin_image[l_bot_y - i][l_border[l_bot_y - i] - 1] =
+//            bin_image[l_bot_y - i][l_border[l_bot_y - i] + 1] = 0;
+//        }
+//    }
+//}
+//       }
+//    }
+
+  
 
 extern void ips200_displayimage032_zoom(uint8 *img, uint16 src_w, uint16 src_h,
                                         uint16 dst_w, uint16 dst_h, uint16 x, uint16 y);
 // 计算中线
-for (i = hightest; i < image_h - 1; i++)
-{
-    center_line[i] = (l_border[i] + r_border[i]) >> 1; // 中线是必须的
-}
-
+  // 重新计算中线
+//ips200_clear();
+    for (i = hightest; i < image_h; i++)
+    {
+        center_line[i] = (l_border[i] + r_border[i]) >> 1;
+        bin_image[i][center_line[i]] =
+        bin_image[i][center_line[i] - 1] =
+        bin_image[i][center_line[i] + 1] = 0;
+    }
 
 //    for (i = 0; i < data_stastics_l; i++)
 //        ips200_draw_point(points_l[i][0] + 2, points_l[i][1], RGB565_BLUE);
@@ -616,7 +766,7 @@ for (i = hightest; i < image_h - 1; i++)
 //    }
 
     // 可选整图显示
-    // ips200_show_gray_image(0, 0, (const uint8 *)bin_image, MT9V03X_W, MT9V03X_H, 240, 180, 0);
+    // ips200_show_gray_image(0, 0, (const uint8 *)bin_image, MT9V03X_W, MT9V03X_H, 188, 120, 0);
 
 
 

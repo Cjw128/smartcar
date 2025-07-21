@@ -69,7 +69,6 @@ int main(void)
     ips200_init(IPS200_TYPE_SPI);
 		extern param_config_t params;
 
-    pit_ms_init(TIM6_PIT, 2);   	// 初始化 5ms 周期定时器
     int current_menu = 1;  // 主菜单或初始菜单编号
     int ret;
 
@@ -103,7 +102,7 @@ int main(void)
                 break;
         }
 
-
+				
     
 
 			

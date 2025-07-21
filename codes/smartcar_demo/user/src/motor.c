@@ -16,7 +16,7 @@
 #define PIT                         (TIM6_PIT)  // 周期中断
 
 /***************************************** 电机部分 **********************************************/
-#define MAX_DUTY            (60)   // 最大占空比
+#define MAX_DUTY            (90)   // 最大占空比
 #define DIR_L               (A0)
 #define PWM_L               (TIM5_PWM_CH2_A1)
 
@@ -104,23 +104,23 @@ void set_motor_independent(int duty_L, int duty_R)
     if (duty_L >= 0)
     {
         gpio_set_level(DIR_L, GPIO_LOW);
-        pwm_set_duty(PWM_L, duty_L * 5000 / 100);
+        pwm_set_duty(PWM_L, duty_L * 4900 / 100);
     }
     else
     {
         gpio_set_level(DIR_L, GPIO_HIGH);
-        pwm_set_duty(PWM_L, -duty_L * 5000 / 100);
+        pwm_set_duty(PWM_L, -duty_L * 4900 / 100);
     }
 
     if (duty_R >= 0)
     {
         gpio_set_level(DIR_R, GPIO_LOW);
-        pwm_set_duty(PWM_R, duty_R * 5000 / 100);
+        pwm_set_duty(PWM_R, duty_R * 4900 / 100);
     }
     else
     {
         gpio_set_level(DIR_R, GPIO_HIGH);
-        pwm_set_duty(PWM_R, -duty_R * 5000 / 100);
+        pwm_set_duty(PWM_R, -duty_R * 4900 / 100);
     }
 }
 bool detect_zebra_cross(uint8 (*image)[image_w])
@@ -219,46 +219,49 @@ float center_weighted_deviation(uint8 start, uint8 end)
     else
         return 0;
 }
-
+float adaptive_base_speed = 0;  // 当前动态基础速度
+int go_on_flag = 1;
 // 主巡线控制函数，计算左右速度目标，调用电机控制
 void line_follow_control(void)
+
+
 {
     if (loss_track(mt9v03x_image))  // 失线保护
     {
         set_motor_independent(0, 0);
+				go_on_flag = 0;
         return;
     }
 
-    if (detect_zebra_cross(mt9v03x_image))
-{
-    set_motor_independent(0, 0);  // 停车
-    return;  // 退出巡线控制
-}
-    float deviation = center_weighted_deviation(image_h - 82, image_h - 70);
-   float adaptive_base_speed;
+//    if (detect_zebra_cross(mt9v03x_image))
+//{
+//    set_motor_independent(0, 0);  // 停车
+//    return;  // 退出巡线控制
+//}
+    float deviation = center_weighted_deviation(image_h - 100, image_h - 70);
 	float abs_dev = fabsf(deviation);
-if (abs_dev < 5.0f)
+if (abs_dev < 10.0f)
     adaptive_base_speed = params.base_speed * 1.0f;
-else if (abs_dev < 15.0f)
-    adaptive_base_speed = params.base_speed * 0.7f;
-else
+else if (abs_dev < 25.0f)
     adaptive_base_speed = params.base_speed * 0.8f;
+else
+    adaptive_base_speed = params.base_speed * 0.6f;
     mpu6050_get_gyro();
     float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;
     float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.1f;
 
     float delta_speed = 
           params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f))
-        - params.Kd_dir * gyro_z_dps*fabs(gyro_z_dps);
+        - params.Kd_dir * gyro_z_dps;//*fabs(gyro_z_dps);
 
     left_target_speed = limit_pwm(adaptive_base_speed - delta_speed, MAX_DUTY);
     right_target_speed = limit_pwm(adaptive_base_speed + delta_speed, MAX_DUTY);
 
     // PID速度环计算PWM
-    //int16 pwm_L = speed_pid_control(&pid_speed_L, left_target_speed, measured_speed_L);
-    //int16 pwm_R = speed_pid_control(&pid_speed_R, right_target_speed, measured_speed_R);
-
+    int16 pwm_L = speed_pid_control(&pid_speed_L, left_target_speed, measured_speed_L);
+    int16 pwm_R = speed_pid_control(&pid_speed_R, right_target_speed, measured_speed_R);
     set_motor_independent(left_target_speed, right_target_speed);
+
 }
 volatile uint8 flag_do_control = 0;
 // PIT定时器中断处理函数，定期更新速度反馈并执行控制
@@ -273,6 +276,5 @@ void pit_handler(void)
     measured_speed_R = encoder_data_2;
 
  line_follow_control();
-
 
 }

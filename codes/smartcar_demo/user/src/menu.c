@@ -2,7 +2,7 @@
 #include "zf_common_headfile.h"
 #include "motor.h"
 #include "menu.h"
-
+extern float adaptive_base_speed;
 int menu1(void)
 {
     int k1 = 0, k2 = 0, k3 = 0;
@@ -68,7 +68,12 @@ int menu2_1(void)
     ips200_clear();
     
     while (1)
-    {				      image_process();
+    {				         pit_ms_init(TIM6_PIT, 2);   	// 初始化 5ms 周期定时器 
+ image_process();
+			// 示例代码段（在你菜单刷新界面函数中）
+char buffer[20];
+sprintf(buffer, "Speed: %.2f", adaptive_base_speed);
+ips200_show_string(0, 100, buffer);  // 在第 5 行显示（你可根据布局改行数）
 
 				
     }
@@ -229,11 +234,11 @@ int menu_param_config(void)
         {
             switch (selected)
             {
-                case PARAM_KP_DIR:        params.Kp_dir       += 0.2f; break;
+                case PARAM_KP_DIR:        params.Kp_dir       += 0.1f; break;
  //               case PARAM_KP_SLOPE:      params.Kp_slope     += 1.0f;  break;
-                case PARAM_KD_DIR:        params.Kd_dir       += 0.2f; break;
-                case PARAM_BASE_SPEED:   params.base_speed   += 10.0f;  break;
-                case PARAM_TARGET_SPEED: params.target_speed += 10.0f;  break;
+                case PARAM_KD_DIR:        params.Kd_dir       += 0.1f; break;
+                case PARAM_BASE_SPEED:   params.base_speed   += 1.0f;  break;
+                case PARAM_TARGET_SPEED: params.target_speed += 1.0f;  break;
                 case PARAM_KP_SPEED:     params.kp_speed     += 0.5f; break;
                 case PARAM_KI_SPEED:     params.ki_speed     += 0.02f; break;
                 case PARAM_KD_SPEED:     params.kd_speed     += 0.02f; break;
@@ -246,11 +251,11 @@ int menu_param_config(void)
         {
             switch (selected)
             {
-                case PARAM_KP_DIR:        params.Kp_dir       -= 0.2f; break;
+                case PARAM_KP_DIR:        params.Kp_dir       -= 0.1f; break;
 //                case PARAM_KP_SLOPE:      params.Kp_slope     -= 1.0f;  break;
-                case PARAM_KD_DIR:        params.Kd_dir       -= 0.2f; break;
-                case PARAM_BASE_SPEED:   params.base_speed   -= 10.0f;  break;
-                case PARAM_TARGET_SPEED: params.target_speed -= 10.0f;  break;
+                case PARAM_KD_DIR:        params.Kd_dir       -= 0.1f; break;
+                case PARAM_BASE_SPEED:   params.base_speed   -= 1.0f;  break;
+                case PARAM_TARGET_SPEED: params.target_speed -= 1.0f;  break;
                 case PARAM_KP_SPEED:     params.kp_speed     -= 0.5f; break;
                 case PARAM_KI_SPEED:     params.ki_speed     -= 0.02f; break;
                 case PARAM_KD_SPEED:     params.kd_speed     -= 0.02f; break;
