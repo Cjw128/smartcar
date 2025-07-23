@@ -557,7 +557,34 @@ uint8 loss_track(unsigned char in_image[MT9V03X_H][MT9V03X_W])
         return 0;  // 正常
     }
 }
+void avoid_obstacle(void)
+{
+    int black_count = 0;
+    for (int i = image_h - 10; i < image_w; i++) {
+        for (int j = 0; j <image_w; j++) {
+            if (bin_image[i][j] == 0) black_count++;
+        }
+    }
 
+    static int last_black_count = 0;
+    int delta = black_count - last_black_count;
+    last_black_count = black_count;
+
+    if (delta > 1000)  // 黑色像素突增阈值，可调
+    {
+        if (image_w / 2 - center_line[image_h - 5] > 10) {
+            // 中线偏左，说明障碍在右，向左避障
+            for (int i = image_h - 30; i < image_h; i++) {
+                r_border[i] = (r_border[i] > 20) ? r_border[i] - 20 : 0;
+            }
+        } else if (center_line[image_h - 5] - image_w / 2 > 10) {
+            // 中线偏右，障碍在左，向右避障
+            for (int i = image_h - 30; i < image_h; i++) {
+                l_border[i] = (l_border[i] < image_w - 20) ? l_border[i] + 20 : image_w - 1;
+            }
+        }
+    }
+}
 
 /*
 函数名称：void image_process(void)
@@ -736,7 +763,7 @@ if (get_start_point(image_h - 2))//找到起点了，再执行八领域，没找
 //}
 //       }
 //    }
-
+avoid_obstacle();
   
 
 extern void ips200_displayimage032_zoom(uint8 *img, uint16 src_w, uint16 src_h,

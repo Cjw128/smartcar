@@ -71,9 +71,9 @@ int menu2_1(void)
     {				         pit_ms_init(TIM6_PIT, 2);   	// 初始化 5ms 周期定时器 
  image_process();
 			// 示例代码段（在你菜单刷新界面函数中）
-char buffer[20];
-sprintf(buffer, "Speed: %.2f", adaptive_base_speed);
-ips200_show_string(0, 100, buffer);  // 在第 5 行显示（你可根据布局改行数）
+//char buffer[20];
+//sprintf(buffer, "Speed: %.2f", adaptive_base_speed);
+//ips200_show_string(0, 100, buffer);  // 在第 5 行显示（你可根据布局改行数）
 
 				
     }
