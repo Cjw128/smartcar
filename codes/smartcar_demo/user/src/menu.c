@@ -11,8 +11,8 @@ int menu1(void)
     // 初始化显示
     ips200_clear();
     ips200_show_string(0, 100, "Menu 1: test1");
-    ips200_show_string(0, 120, "Menu 2: test2");
-    ips200_show_string(0, 140, "Menu 3: test3");
+    ips200_show_string(0, 120, "Config");
+    ips200_show_string(0, 140, "Start");
 
     while (1)
     {

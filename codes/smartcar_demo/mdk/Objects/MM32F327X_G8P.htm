@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\MM32F327X_G8P.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\MM32F327X_G8P.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Wed Jul 23 20:22:46 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Fri Jul 25 21:51:31 2025
 <BR><P>
 <H3>Maximum Stack Usage =       2204 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -393,7 +393,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;center_weighted_deviation
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;otsu_find_threshold
@@ -407,7 +407,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dm1xa_sound_callback
 </UL>
 
-<P><STRONG><a name="[ba]"></a>__aeabi_fcmplt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmplt.o(.text))
+<P><STRONG><a name="[bc]"></a>__aeabi_fcmplt</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, fcmplt.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;unified_speed_pid_control
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
 </UL>
@@ -446,7 +446,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;unified_speed_pid_control
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_set_duty
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pwm_init
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;center_weighted_deviation
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;otsu_find_threshold
@@ -1192,16 +1192,16 @@ Global Symbols
 <LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu1
 </UL>
 
-<P><STRONG><a name="[b6]"></a>line_follow_control</STRONG> (Thumb, 398 bytes, Stack size 32 bytes, motor.o(.text.line_follow_control))
+<P><STRONG><a name="[b6]"></a>line_follow_control</STRONG> (Thumb, 396 bytes, Stack size 32 bytes, motor.o(.text.line_follow_control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 576<LI>Call Chain = line_follow_control &rArr; mpu6050_get_gyro &rArr; soft_iic_read_8bit_registers &rArr; soft_iic_read_data &rArr; debug_assert_handler &rArr; debug_output &rArr; __2sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;unified_speed_pid_control
 <LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;set_motor_independent
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
-<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro
+<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_gyro_transition
+<LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro
 <LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;detect_zebra_cross
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;center_weighted_deviation
-<LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmplt
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmplt
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;loss_track
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
@@ -1213,8 +1213,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pit_handler
 </UL>
 
-<P><STRONG><a name="[b7]"></a>loss_track</STRONG> (Thumb, 252 bytes, Stack size 0 bytes, otsu.o(.text.loss_track))
-<BR><BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
+<P><STRONG><a name="[b7]"></a>loss_track</STRONG> (Thumb, 194 bytes, Stack size 16 bytes, otsu.o(.text.loss_track))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = loss_track
+</UL>
+<BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
 </UL>
 
 <P><STRONG><a name="[49]"></a>main</STRONG> (Thumb, 126 bytes, Stack size 8 bytes, main.o(.text.main))
@@ -1238,7 +1240,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[c6]"></a>menu1</STRONG> (Thumb, 284 bytes, Stack size 32 bytes, menu.o(.text.menu1))
+<P><STRONG><a name="[c6]"></a>menu1</STRONG> (Thumb, 268 bytes, Stack size 32 bytes, menu.o(.text.menu1))
 <BR><BR>[Stack]<UL><LI>Max Depth = 592<LI>Call Chain = menu1 &rArr; ips200_show_string &rArr; ips200_show_char &rArr; ips200_set_region &rArr; debug_assert_handler &rArr; debug_output &rArr; __2sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_delay_ms
@@ -1287,7 +1289,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[bb]"></a>mpu6050_get_gyro</STRONG> (Thumb, 78 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_get_gyro))
+<P><STRONG><a name="[ba]"></a>mpu6050_get_gyro</STRONG> (Thumb, 78 bytes, Stack size 16 bytes, zf_device_mpu6050.o(.text.mpu6050_get_gyro))
 <BR><BR>[Stack]<UL><LI>Max Depth = 544<LI>Call Chain = mpu6050_get_gyro &rArr; soft_iic_read_8bit_registers &rArr; soft_iic_read_data &rArr; debug_assert_handler &rArr; debug_output &rArr; __2sprintf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_read_8bit_registers
@@ -1295,7 +1297,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;line_follow_control
 </UL>
 
-<P><STRONG><a name="[bc]"></a>mpu6050_gyro_transition</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, zf_device_mpu6050.o(.text.mpu6050_gyro_transition))
+<P><STRONG><a name="[bb]"></a>mpu6050_gyro_transition</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, zf_device_mpu6050.o(.text.mpu6050_gyro_transition))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = mpu6050_gyro_transition &rArr; __aeabi_fdiv
 </UL>
 <BR>[Calls]<UL><LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
@@ -1469,7 +1471,7 @@ Global Symbols
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_send_data
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_iic_read_data
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro
+<BR>[Called By]<UL><LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mpu6050_get_gyro
 </UL>
 
 <P><STRONG><a name="[d7]"></a>soft_iic_sccb_read_register</STRONG> (Thumb, 558 bytes, Stack size 40 bytes, zf_driver_soft_iic.o(.text.soft_iic_sccb_read_register))
@@ -1621,7 +1623,7 @@ Global Symbols
 <P><STRONG><a name="[bd]"></a>unified_speed_pid_control</STRONG> (Thumb, 160 bytes, Stack size 24 bytes, motor.o(.text.unified_speed_pid_control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = unified_speed_pid_control &rArr; __aeabi_fsub &rArr; __aeabi_fadd &rArr; _float_epilogue
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmplt
+<BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fcmplt
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul

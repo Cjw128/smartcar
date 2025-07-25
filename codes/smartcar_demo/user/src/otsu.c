@@ -536,19 +536,30 @@ void image_draw_rectan(uint8(*image)[image_w])
 		//image[image_h-1][i] = 0;
 
 	}
-}
+}// 失线检测
 uint8 loss_track(unsigned char in_image[MT9V03X_H][MT9V03X_W])
 {
     int sum = 0;
-    for (int i = 0; i < 10; i++)
+    int count = 0;
+    
+    for (int j = 0; j < 5; j++)
     {
-        for (int j = 0; j < 3; j++)
+        for (int i = 0; i < 30; i++)
         {
-            sum += in_image[MT9V03X_H - 1 - j][MT9V03X_W / 2 - 5 + i];
+            int col = MT9V03X_W / 2 - 15 + i;  
+            int row = MT9V03X_H - 1 - j;       
+            if (col >= 0 && col < MT9V03X_W && row >= 0 && row < MT9V03X_H)
+            {
+                sum += in_image[row][col];
+                count++;
+            }
         }
     }
-    int average = sum / 30; // 计算平均值
-    if (average < 140)
+    
+    if (count == 0) return 0;
+    int average = sum / count;
+    
+    if (average < 120)  
     {
         return 1;  // 出界
     }
@@ -570,7 +581,7 @@ void avoid_obstacle(void)
     int delta = black_count - last_black_count;
     last_black_count = black_count;
 
-    if (delta > 1000)  // 黑色像素突增阈值，可调
+    if (delta > 500)  // 黑色像素突增阈值，可调
     {
         if (image_w / 2 - center_line[image_h - 5] > 10) {
             // 中线偏左，说明障碍在右，向左避障

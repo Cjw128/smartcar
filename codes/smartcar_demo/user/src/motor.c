@@ -16,7 +16,7 @@
 #define PIT                         (TIM6_PIT)  // 周期中断
 
 /***************************************** 电机部分 **********************************************/
-#define MAX_DUTY            (90)   // 最大占空比
+#define MAX_DUTY            (200)   // 最大占空比
 #define DIR_L               (A0)
 #define PWM_L               (TIM5_PWM_CH2_A1)
 
@@ -260,21 +260,28 @@ void line_follow_control(void)
     set_motor_independent(0, 0);  // 停车
     return;  // 退出巡线控制
 }
-    float deviation = center_weighted_deviation(image_h - 100, image_h - 80);
-	float abs_dev = fabsf(deviation);
-if (abs_dev < 10.0f)
-    adaptive_base_speed = params.base_speed * 1.0f;
-else if (abs_dev < 25.0f)
-    adaptive_base_speed = params.base_speed * 0.7f;
-else
-    adaptive_base_speed = params.base_speed * 0.5f;
-    mpu6050_get_gyro();
+ mpu6050_get_gyro();
     float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;
-    float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.1f;
-
-    float delta_speed = 
+    float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.5f;
+    float deviation = center_weighted_deviation(image_h - 95, image_h - 75);
+	float abs_dev = fabsf(deviation);
+ float delta_speed = 
           params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f))
         - params.Kd_dir * gyro_z_dps;//*fabs(gyro_z_dps);
+if (abs_dev < 10.0f)
+{adaptive_base_speed = params.base_speed * 1.0f;	
+
+}
+else if (abs_dev < 25.0f)
+{adaptive_base_speed = params.base_speed * 0.6f;
+	
+}
+	else
+	{adaptive_base_speed = params.base_speed * 0.5f;
+
+	}
+
+   
  int16 base_pwm = unified_speed_pid_control(&pid_speed_L, adaptive_base_speed, measured_speed_L, measured_speed_R);
     
     // 计算左右轮最终PWM（基础PWM + 转向差速）
@@ -288,7 +295,7 @@ volatile uint8 flag_do_control = 0;
 // PIT定时器中断处理函数，定期更新速度反馈并执行控制
 void pit_handler(void)
 {
-     encoder_data_1 = encoder_get_count(ENCODER_1);
+    encoder_data_1 = encoder_get_count(ENCODER_1);
     encoder_data_2 = -encoder_get_count(ENCODER_2);
     encoder_clear_count(ENCODER_1);
     encoder_clear_count(ENCODER_2);
