@@ -17,6 +17,7 @@ typedef struct
     float target_speed;
     float ki_speed;
     float kd_speed;
+    float kd_diff;
 } param_config_t;
 
 extern param_config_t params;

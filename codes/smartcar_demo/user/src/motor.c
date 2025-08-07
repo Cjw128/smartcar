@@ -16,7 +16,7 @@
 #define PIT                         (TIM6_PIT)  // 周期中断
 
 /***************************************** 电机部分 **********************************************/
-#define MAX_DUTY            (200)   // 最大占空比
+#define MAX_DUTY            (90)   // 最大占空比
 #define DIR_L               (A0)
 #define PWM_L               (TIM5_PWM_CH2_A1)
 
@@ -40,6 +40,7 @@ typedef struct {
     float last_error;
 } PID_t;
 
+
 static PID_t pid_speed_L;
 static PID_t pid_speed_R;
 int16 left_target_speed = 0;
@@ -61,21 +62,37 @@ int16 limit_pwm(int16 x, int limit)
     return x;
 }
 
-// PID速度控制计算
-int16 speed_pid_control(PID_t *pid, int16 target_speed, int16 measured_speed)
+typedef struct {
+    float Kp;
+    float Ki;
+    float Kd;
+    float output;
+    float last_error;
+    float prev_error;
+    float last_i;
+} PID_INCREMENT_TypeDef;
+
+static PID_INCREMENT_TypeDef pid_speed_L_inc = {0};
+static PID_INCREMENT_TypeDef pid_speed_R_inc = {0};
+float pid_increment(PID_INCREMENT_TypeDef *pid, float target, float current, float limit, float kp, float ki, float kd)
 {
-    float error = target_speed - measured_speed;
-    pid->integral += error;
-
-    // 积分限幅防止积分饱和
-    if (pid->integral > 100.0f) pid->integral = 100.0f;
-    if (pid->integral < -100.0f) pid->integral = -100.0f;
-
-    float derivative = error - pid->last_error;
+    float error = target - current;
+    
+    float p_term = kp * (error - pid->last_error);
+    float i_term = ki * error * 0.9f + pid->last_i * 0.1f;       
+    float d_term = kd * (error - 2 * pid->last_error + pid->prev_error);
+    float increment = p_term + i_term + d_term;
+    pid->output += increment;
+    pid->last_i = i_term;
+    // 更新误差历史
+    pid->prev_error = pid->last_error;
     pid->last_error = error;
 
-    float output = pid->Kp * error + pid->Ki * pid->integral + pid->Kd * derivative;
-    return limit_pwm((int16)output, MAX_DUTY);
+    // 输出限幅
+    if (pid->output > limit) pid->output = limit;
+    else if (pid->output < -limit) pid->output = -limit;
+    
+    return pid->output;
 }
 int16 unified_speed_pid_control(PID_t *pid, int16 target_speed, int16 left_speed, int16 right_speed)
 {
@@ -124,23 +141,23 @@ void set_motor_independent(int duty_L, int duty_R)
     if (duty_L >= 0)
     {
         gpio_set_level(DIR_L, GPIO_LOW);
-        pwm_set_duty(PWM_L, duty_L * 4900 / 100);
+        pwm_set_duty(PWM_L, duty_L * 6000 / 100);
     }
     else
     {
         gpio_set_level(DIR_L, GPIO_HIGH);
-        pwm_set_duty(PWM_L, -duty_L * 4900 / 100);
+        pwm_set_duty(PWM_L, -duty_L * 6000 / 100);
     }
 
     if (duty_R >= 0)
     {
         gpio_set_level(DIR_R, GPIO_LOW);
-        pwm_set_duty(PWM_R, duty_R * 4900 / 100);
+        pwm_set_duty(PWM_R, duty_R * 6000 / 100);
     }
     else
     {
         gpio_set_level(DIR_R, GPIO_HIGH);
-        pwm_set_duty(PWM_R, -duty_R * 4900 / 100);
+        pwm_set_duty(PWM_R, -duty_R * 6000 / 100);
     }
 }
 int go_on_flag = 1;
@@ -176,28 +193,25 @@ bool detect_zebra_cross(uint8 (*image)[image_w])
 // PID参数初始化
 void pid_speed_init_from_params(void)
 {
-    pid_speed_L.Kp = params.kp_speed;
-    pid_speed_L.Ki = params.ki_speed;
-    pid_speed_L.Kd = params.kd_speed;
-    pid_speed_L.integral = 0;
-    pid_speed_L.last_error = 0;
+   
 
-    pid_speed_R.Kp = params.kp_speed;
-    pid_speed_R.Ki = params.ki_speed;
-    pid_speed_R.Kd = params.kd_speed;
-    pid_speed_R.integral = 0;
-    pid_speed_R.last_error = 0;
+    // 增量式PID初始化
+    pid_speed_L_inc.Kp = params.kp_speed;
+    pid_speed_L_inc.Ki = params.ki_speed;
+    pid_speed_L_inc.Kd = params.kd_speed;
+    pid_speed_L_inc.last_error = 0;
+    pid_speed_L_inc.prev_error = 0;
+    pid_speed_L_inc.output = 0;
+
+    pid_speed_R_inc.Kp = params.kp_speed;
+    pid_speed_R_inc.Ki = params.ki_speed;
+    pid_speed_R_inc.Kd = params.kd_speed;
+    pid_speed_R_inc.last_error = 0;
+    pid_speed_R_inc.prev_error = 0;
+    pid_speed_R_inc.output = 0;
 }
 
-// 速度反馈更新
-void update_speed_feedback(void)
-{
-    measured_speed_L = encoder_get_count(ENCODER_1);
-    measured_speed_R = encoder_get_count(ENCODER_2);
 
-    encoder_clear_count(ENCODER_1);
-    encoder_clear_count(ENCODER_2);
-}
 
 #define OFFSET -6.524390f
 static float gyro_z_filtered = 0.0f;
@@ -242,6 +256,7 @@ float center_weighted_deviation(uint8 start, uint8 end)
         return 0;
 }
 float adaptive_base_speed = 0;  // 当前动态基础速度
+float last_deviation = 0;
 
 // 主巡线控制函数，计算左右速度目标，调用电机控制
 void line_follow_control(void)
@@ -260,49 +275,55 @@ void line_follow_control(void)
     set_motor_independent(0, 0);  // 停车
     return;  // 退出巡线控制
 }
+
+    measured_speed_L = encoder_data_1;
+    measured_speed_R = encoder_data_2;
  mpu6050_get_gyro();
     float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;
     float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.5f;
-    float deviation = center_weighted_deviation(image_h - 95, image_h - 75);
+    float deviation = center_weighted_deviation(image_h - 95, image_h - 65);
 	float abs_dev = fabsf(deviation);
+    float diff = deviation - last_deviation;
+    last_deviation = deviation;
  float delta_speed = 
           params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f))
-        - params.Kd_dir * gyro_z_dps;//*fabs(gyro_z_dps);
-if (abs_dev < 10.0f)
-{adaptive_base_speed = params.base_speed * 1.0f;	
+        - params.Kd_dir * gyro_z_dps//*fabs(gyro_z_dps);
+        - params.kd_diff *diff;
+//if (abs_dev < 10.0f)
+//{adaptive_base_speed = params.base_speed * 1.0f;	
 
-}
-else if (abs_dev < 25.0f)
-{adaptive_base_speed = params.base_speed * 0.6f;
-	
-}
-	else
-	{adaptive_base_speed = params.base_speed * 0.5f;
+//}
+//else if (abs_dev < 25.0f)
+//{adaptive_base_speed = params.base_speed * 0.7f;
+//	
+//}
+//	else
+//	{adaptive_base_speed = params.base_speed * 0.6f;
 
-	}
+//	}
+ adaptive_base_speed = params.base_speed;
+    left_target_speed = adaptive_base_speed + delta_speed;
+    right_target_speed = adaptive_base_speed - delta_speed;
 
-   
- int16 base_pwm = unified_speed_pid_control(&pid_speed_L, adaptive_base_speed, measured_speed_L, measured_speed_R);
-    
-    // 计算左右轮最终PWM（基础PWM + 转向差速）
-    int16 pwm_L = base_pwm - delta_speed;
-    int16 pwm_R = base_pwm + delta_speed;
-    
-    // 限幅并设置电机PWM
-    set_motor_independent(pwm_L, pwm_R);
+    // 使用增量式PID控制
+    int16 duty_L = (int16)pid_increment(&pid_speed_L_inc, left_target_speed, measured_speed_L, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed);
+    int16 duty_R = (int16)pid_increment(&pid_speed_R_inc, right_target_speed, measured_speed_R, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed);
+    set_motor_independent(duty_L, duty_R);
+	//printf("%d,%d,%d\n",measured_speed_L,measured_speed_R,left_target_speed);
 }
 volatile uint8 flag_do_control = 0;
 // PIT定时器中断处理函数，定期更新速度反馈并执行控制
 void pit_handler(void)
 {
+   
+ line_follow_control();
+
+}
+void encoder_sample_handler(void)
+{
     encoder_data_1 = encoder_get_count(ENCODER_1);
     encoder_data_2 = -encoder_get_count(ENCODER_2);
     encoder_clear_count(ENCODER_1);
     encoder_clear_count(ENCODER_2);
-
-    measured_speed_L = encoder_data_1;
-    measured_speed_R = encoder_data_2;
-
- line_follow_control();
 
 }
