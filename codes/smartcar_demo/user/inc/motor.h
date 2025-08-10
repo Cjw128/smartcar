@@ -18,4 +18,5 @@ void line_follow_control(void);
 extern volatile uint8 image_ready_flag;
 void calibrate_gyro_offset(void);
 void encoder_sample_handler(void);
+void pid_speed_init_from_params(void);
 #endif

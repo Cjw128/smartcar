@@ -1,9 +1,14 @@
 
 #include "zf_common_headfile.h"
 #include "motor.h"
+
+
+//uint8 image_copy[image_h][image_w];
 extern uint8 mt9v03x_image[MT9V03X_H][MT9V03X_W]; 
 #define PROTECT_ROW_COUNT 10        // 检测底部的行数
 #define PROTECT_WHITE_PIXEL_MIN 50 // 最低白色像素阈值
+#define Image_Delete 10
+
 //------------------------------------------------------------------------------------------------------------------
 // 函数名称			int my_abs(int value)
 // 功能说明			求绝对值
@@ -160,7 +165,8 @@ void turn_to_bin(void)
       for(j = 0;j<image_w;j++)
       {
           if(original_image[i][j]>image_thereshold)bin_image[i][j] = white_pixel;
-          else bin_image[i][j] = black_pixel;
+          else {bin_image[i][j] = black_pixel;}
+		  image_copy[i][j] = bin_image[i][j];
       }
   }
 }
@@ -596,165 +602,446 @@ void avoid_obstacle(void)
         }
     }
 }
+/**                    
+  * @brief 左边丢线
+  * @param 无
+  * @retval 左边丢线的数量
+  */
+uint8 Lost_Left(void){
+		uint8 Lost_Left_Sum=0;
+		uint8 i=0;
+		for(i=119;i>32;i--){
+				if(l_border[i]==1){
+						Lost_Left_Sum++;
+				}
+		}
+		return Lost_Left_Sum;
+}
+/**                    
+  * @brief 右边丢线
+  * @param 无
+  * @retval 右边丢线的数量
+  */
+uint8 Lost_Right(void){
+		uint8 Lost_Right_Sum=0;
+		uint8 i=0;
+		for(i=119;i>32;i--){
+				if(r_border[i]==186){
+						Lost_Right_Sum++;
+				}
+		}
+		return Lost_Right_Sum;
+}
 
-/** 
+/**                    
+  * @brief 判断十字
+  * @param 无
+  * @retval 无
+  */
+uint8 Judge_Cross(void){
+		uint8 leftlost =Lost_Left();
+		uint8 rightlost=Lost_Right();
+		if(leftlost>=30 && rightlost>=30)return 1;
+		return 0;
+}
+/**                    
+	* @brief 找左上拐点
+  * @param 无
+  * @retval 无
+  */
+uint8 left_up_point=0;
+void Get_Left_Up_Point(void){
+		left_up_point=0;
+		uint8 i=0;
+		for(int i=32+7;i<120-4;i++){
+        //点i下面2个连续相差不大并且点i与上面边3个点分别相差很大，认为有上左拐点
+        if(left_up_point==0&&
+        l_border[i-1]-l_border[i]<=3&&
+        l_border[i-2]-l_border[i-1]<=3&&
+        l_border[i-3]-l_border[i-2]<=3&&
+        l_border[i-4]-l_border[i-3]<=3&&
+        l_border[i-5]-l_border[i-4]<=3&&
+        (l_border[i]-l_border[i+2])>=5&&
+        (l_border[i]-l_border[i+3])>=8&&
+        (l_border[i]-l_border[i+4])>=8&&
+				image_copy[i-3][l_border[i]]==0&&//上面是黑色
+				image_copy[i+3][l_border[i]]==255&&//下面是白色
+				image_copy[i-3][l_border[i]-3]==0&&  //左上面是黑色			因为侧入的时候左边可能是白色 左上防止误判
+				image_copy[i][l_border[i]+3]==255//右边是白色
+				){           
+            left_up_point=i;
+						break;
+        }
+		}
+}
+/**                    
+	* @brief 找左下拐点
+  * @param 无
+  * @retval 无
+  */
+uint8 left_down_point=0;
+void Get_Left_down_Point(void){
+		left_down_point=0;
+		uint8 i=0;
+		for(int i=119-7;i>left_up_point+4;i--){
+        //点i下面2个连续相差不大并且点i与上面边3个点分别相差很大，认为有上左拐点
+        if(left_down_point==0&&
+        (l_border[i]-l_border[i+1])<=3&&
+        (l_border[i+1]-l_border[i+2])<=3&&
+        (l_border[i+2]-l_border[i+3])<=3&&
+        (l_border[i+3]-l_border[i+4])<=3&&
+        (l_border[i]-l_border[i-3])>=5&&//不从i-1开始防止噪声干扰
+        (l_border[i]-l_border[i-4])>=8&&
+        (l_border[i]-l_border[i-5])>=8&&
+				image_copy[i][l_border[i]+3]==255&&//右边是白色
+				image_copy[i-3][l_border[i]]==255&&//上面是白色
+				image_copy[i+3][l_border[i]]==255&&//下面是白色
+				image_copy[i+3][l_border[i]-3]==0  //左下面是黑色			
+				){           
+            left_down_point=i;
+						break;
+        }
+		}
+}
+/**                   
+	 * @brief 找右上拐点
+	 * @param 无
+	 * @retval 无
+	 */
+uint8 right_up_point=0;
+void Get_Right_Up_Point(void){
+		right_up_point=0;
+		uint8 i=0;
+		for(int i=32+7;i<120-4;i++){
+        if(right_up_point==0&&
+				(r_border[i]-r_border[i-1])<=3&&
+				(r_border[i-1]-r_border[i-2])<=3&&
+				(r_border[i-2]-r_border[i-3])<=3&&
+				(r_border[i-3]-r_border[i-4])<=3&&
+				(r_border[i-4]-r_border[i-5])<=3&&
+				r_border[i+2]-r_border[i]>=5 &&
+				r_border[i+3]-r_border[i]>=8&&
+				r_border[i+4]-r_border[i]>=8&&
+				image_copy[i-3][r_border[i]]==0&&//上面是黑色
+				image_copy[i+3][r_border[i]]==255&&//下面是白色
+				image_copy[i][r_border[i]-3]==255&&  //左面是白色			
+				image_copy[i-3][r_border[i]+3]==0//右上边是黑色
+				
+				){           
+            right_up_point=i;
+						break;
+
+        }
+		}
+}
+
+/**                    
+	* @brief 找右下拐点
+  * @param 无
+  * @retval 无
+  */
+uint8 right_down_point=0;
+void Get_Right_down_Point(void){
+		right_down_point=0;
+		uint8 i=0;
+		for(int i=119-7;i>right_up_point+4;i--){
+        //点i下面2个连续相差不大并且点i与上面边3个点分别相差很大，认为有上左拐点
+        if(right_down_point==0&&
+        (r_border[i+1]-r_border[i])<=3&&
+        (r_border[i+2]-r_border[i+1])<=3&&
+        (r_border[i+3]-r_border[i+2])<=3&&
+        (r_border[i+4]-r_border[i+3])<=3&&
+        (r_border[i-2]-r_border[i])>=5&&//不从i-1开始防止噪声干扰
+        (r_border[i-3]-r_border[i])>=8&&
+        (r_border[i-4]-r_border[i])>=8&&
+				image_copy[i-3][r_border[i]]==255&&//上面是白色
+				image_copy[i+3][r_border[i]]==255&&//下面是白色
+				image_copy[i][r_border[i]-3]==255&&  //左面是白色			
+				image_copy[i+3][r_border[i]+3]==0//右下边是黑色
+				
+				){           
+            right_down_point=i;
+						break;
+        }
+		}
+}
+/**
+	* @brief  左边补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+	* @param  x2 终点x坐标
+	* @param  y2 终点y坐标
+  * @retval 无
+	*/
+//(x1,y1)--->(x2,y2)    y1<y2
+void left_draw_line(uint8 x1,uint8 y1,uint8 x2,uint8 y2)
+{	
+    uint8 hx;
+    uint8 a1=y1;
+    uint8 a2=y2;
+		uint8 i;
+		uint8 t;
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+
+    if(x2>=186)x2=186;
+    else if(x2<=2)x2=2;
+    if(y2>=MT9V03X_H-3)y2=MT9V03X_H-3;
+    else if(y2<=Image_Delete)y2=Image_Delete;
+//防止for循环范围错误、
+    if(a1>a2)//坐标互换
+    {
+        t=a1;
+        a1=a2;
+        a2=t;
+    }
+//计算斜率补线
+    for(i=a1;i<a2;i++)
+    {
+        hx=x1+(i-y1)*(x2-x1)/(y2-y1);//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        l_border[i]=hx;
+			//ips200_draw_point(hx, i, RGB565_YELLOW);
+    }
+}
+/**
+	* @brief  右边补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+	* @param  x2 终点x坐标
+	* @param  y2 终点y坐标
+  * @retval 无
+	*/
+//(x1,y1)--->(x2,y2)    y1<y2
+void right_draw_line(uint8 x1,uint8 y1,uint8 x2,uint8 y2)
+{	
+    uint8 hx;
+    uint8 a1=y1;
+    uint8 a2=y2;
+		uint8 i;
+		uint8 t;
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+
+    if(x2>=186)x2=186;
+    else if(x2<=2)x2=2;
+    if(y2>=MT9V03X_H-3)y2=MT9V03X_H-3;
+    else if(y2<=Image_Delete)y2=Image_Delete;
+//防止for循环范围错误、
+    if(a1>a2)//坐标互换
+    {
+        t=a1;
+        a1=a2;
+        a2=t;
+    }
+//计算斜率补线
+    for(i=a1;i<a2;i++)
+    {
+        hx=x1+(i-y1)*(x2-x1)/(y2-y1);//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        r_border[i]=hx;
+			//ips200_draw_point(hx, i, RGB565_YELLOW);
+    }
+}
+
+/**
 * @brief 最小二乘法
-* @param uint8 begin				输入起点
-* @param uint8 end					输入终点
-* @param uint8 *border				输入需要计算斜率的边界首地址
-*  @see CTest		Slope_Calculate(start, end, border);//斜率
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
+* @param uint8 begin                输入起点
+* @param uint8 end                  输入终点
+* @param uint8 *border              输入需要计算斜率的边界首地址
+* @retval 返回说明
 */
 float Slope_Calculate(uint8 begin, uint8 end, uint8 *border)
 {
-	float xsum = 0, ysum = 0, xysum = 0, x2sum = 0;
-	int16 i = 0;
-	float result = 0;
-	static float resultlast;
-
-	for (i = begin; i < end; i++)
-	{
-		xsum += i;
-		ysum += border[i];
-		xysum += i * (border[i]);
-		x2sum += i * i;
-
-	}
-	if ((end - begin)*x2sum - xsum * xsum) //判断除数是否为零
-	{
-		result = ((end - begin)*xysum - xsum * ysum) / ((end - begin)*x2sum - xsum * xsum);
-		resultlast = result;
-	}
-	else
-	{
-		result = resultlast;
-	}
-	return result;
+    float xsum = 0, ysum = 0, xysum = 0, x2sum = 0;
+    int16 i = 0;
+    float result = 0;
+    static float resultlast;
+ 
+    for (i = begin; i < end; i++)
+    {
+        xsum += i;
+        ysum += border[i];
+        xysum += i * (border[i]);
+        x2sum += i * i;
+ 
+    }
+    if ((end - begin)*x2sum - xsum * xsum) //判断除数是否为零
+    {
+        result = ((end - begin)*xysum - xsum * ysum) / ((end - begin)*x2sum - xsum * xsum);
+        resultlast = result;
+    }
+    else
+    {
+        result = resultlast;
+    }
+    return result;
+}
+/**
+	* @brief  左上单拐点补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+  * @retval 无
+	*/
+//(x1,y1)--->(x2,y2)    y1<y2
+void left_up_point_draw_line(uint8 x1,uint8 y1)
+{	
+    uint8 hx;
+		uint8 i;
+		float k;
+		k=Slope_Calculate(left_up_point-7,left_up_point, l_border);
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+//计算斜率补线
+    for(i=y1;i<120;i++)
+    {
+        hx=x1+(i-y1)*k;//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        l_border[i]=hx;
+    }
+}
+/**
+  * @brief  右上单拐点补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+  * @retval 无
+	*/
+//(x1,y1)--->(x2,y2)    y1<y2
+void right_up_point_draw_line(uint8 x1,uint8 y1)
+{	
+    uint8 hx;
+		uint8 i;
+		float k;
+		k=Slope_Calculate(right_up_point-7,right_up_point, r_border);
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+//计算斜率补线
+    for(i=y1;i<120;i++)
+    {
+        hx=x1+(i-y1)*k;//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        r_border[i]=hx;
+    }
+}
+/**
+	* @brief  左下单拐点补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+  * @retval 无
+	*/
+void left_down_point_draw_line (uint8 x1,uint8 y1){
+    uint8 hx;
+		uint8 i;
+		float k;
+		k=Slope_Calculate(left_down_point,left_down_point+7, l_border);
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+//计算斜率补线
+    for(i=y1;i>32;i--)
+    {
+        hx=x1+(i-y1)*k;//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        l_border[i]=hx;
+    }
+}
+/**
+	* @brief  左下单拐点补线
+	* @param  x1 起点x坐标
+	* @param  y1 起点y坐标
+  * @retval 无
+	*/
+void right_down_point_draw_line (uint8 x1,uint8 y1){
+    uint8 hx;
+		uint8 i;
+		float k;
+		k=Slope_Calculate(right_down_point,right_down_point+7, r_border);
+//防止输入越界
+    if(x1>=186)x1=186;
+    else if(x1<=2)x1=2;
+    if(y1>=MT9V03X_H-3)y1=MT9V03X_H-3;
+    else if(y1<=Image_Delete)y1=Image_Delete;
+//计算斜率补线
+    for(i=y1;i>32;i--)
+    {
+        hx=x1+(i-y1)*k;//使用斜率补线
+        //防止补线越界
+        if(hx>=186)hx=186;
+        else if(hx<=1)hx=1;
+        r_border[i]=hx;
+    }
 }
 
-/** 
-* @brief 计算斜率截距
-* @param uint8 start				输入起点
-* @param uint8 end					输入终点
-* @param uint8 *border				输入需要计算斜率的边界
-* @param float *slope_rate			输入斜率地址
-* @param float *intercept			输入截距地址
-*  @see CTest		calculate_s_i(start, end, r_border, &slope_l_rate, &intercept_l);
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
-*/
-void calculate_s_i(uint8 start, uint8 end, uint8 *border, float *slope_rate, float *intercept)
-{
-	uint16 i, num = 0;
-	uint16 xsum = 0, ysum = 0;
-	float y_average, x_average;
-
-	num = 0;
-	xsum = 0;
-	ysum = 0;
-	y_average = 0;
-	x_average = 0;
-	for (i = start; i < end; i++)
-	{
-		xsum += i;
-		ysum += border[i];
-		num++;
-	}
-
-	//计算各个平均数
-	if (num)
-	{
-		x_average = (float)(xsum / num);
-		y_average = (float)(ysum / num);
-
-	}
-
-	/*计算斜率*/
-	*slope_rate = Slope_Calculate(start, end, border);//斜率
-	*intercept = y_average - (*slope_rate)*x_average;//截距
-}
-
-/** 
-* @brief 十字补线函数
-* @param uint8(*image)[image_w]		输入二值图像
-* @param uint8 *l_border			输入左边界首地址
-* @param uint8 *r_border			输入右边界首地址
-* @param uint16 total_num_l			输入左边循环总次数
-* @param uint16 total_num_r			输入右边循环总次数
-* @param uint16 *dir_l				输入左边生长方向首地址
-* @param uint16 *dir_r				输入右边生长方向首地址
-* @param uint16(*points_l)[2]		输入左边轮廓首地址
-* @param uint16(*points_r)[2]		输入右边轮廓首地址
-*  @see CTest		cross_fill(image,l_border, r_border, data_statics_l, data_statics_r, dir_l, dir_r, points_l, points_r);
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
- */
-void cross_fill(uint8(*image)[image_w], uint8 *l_border, uint8 *r_border, uint16 total_num_l, uint16 total_num_r,
-										 uint16 *dir_l, uint16 *dir_r, uint16(*points_l)[2], uint16(*points_r)[2])
-{
-	uint8 i;
-	uint8 break_num_l = 0;
-	uint8 break_num_r = 0;
-	uint8 start, end;
-	float slope_l_rate = 0, intercept_l = 0;
-	//出十字
-	for (i = 1; i < total_num_l; i++)
-	{
-		if (dir_l[i - 1] == 4 && dir_l[i] == 4 && dir_l[i + 3] == 6 && dir_l[i + 5] == 6 && dir_l[i + 7] == 6)
-		{
-			break_num_l = points_l[i][1];//传递y坐标
-//			printf("brea_knum-L:%d\n", break_num_l);
-//			printf("I:%d\n", i);
-//			printf("十字标志位：1\n");
-			break;
-		}
-	}
-	for (i = 1; i < total_num_r; i++)
-	{
-		if (dir_r[i - 1] == 4 && dir_r[i] == 4 && dir_r[i + 3] == 6 && dir_r[i + 5] == 6 && dir_r[i + 7] == 6)
-		{
-			break_num_r = points_r[i][1];//传递y坐标
-//			printf("brea_knum-R:%d\n", break_num_r);
-//			printf("I:%d\n", i);
-//			printf("十字标志位：1\n");
-			break;
-		}
-	}
-	if (break_num_l&&break_num_r&&image[image_h - 1][4] && image[image_h - 1][image_w - 4])//两边生长方向都符合条件
-	{
-		//计算斜率
-		start = break_num_l - 15;
-		start = limit_a_b(start, 0, image_h);
-		end = break_num_l - 5;
-		calculate_s_i(start, end, l_border, &slope_l_rate, &intercept_l);
-		//printf("slope_l_rate:%d\nintercept_l:%d\n", slope_l_rate, intercept_l);
-		for (i = break_num_l - 5; i < image_h - 1; i++)
-		{
-			l_border[i] = slope_l_rate * (i)+intercept_l;//y = kx+b
-			l_border[i] = limit_a_b(l_border[i], border_min, border_max);//限幅
-		}
-
-		//计算斜率
-		start = break_num_r - 15;//起点
-		start = limit_a_b(start, 0, image_h);//限幅
-		end = break_num_r - 5;//终点
-		calculate_s_i(start, end, r_border, &slope_l_rate, &intercept_l);
-		//printf("slope_l_rate:%d\nintercept_l:%d\n", slope_l_rate, intercept_l);
-		for (i = break_num_r - 5; i < image_h - 1; i++)
-		{
-			r_border[i] = slope_l_rate * (i)+intercept_l;
-			r_border[i] = limit_a_b(r_border[i], border_min, border_max);
-		}
-
-
-	}
-
-}
-
+/**                    
+  * @brief 十字补线
+  * @param 无
+  * @retval 无
+  */
+uint8 Cross_flag=0;
+void myCross_fill(void){
+		Cross_flag=0;
+		if(Judge_Cross()){
+				Cross_flag=1;
+//				Buzzer_On_Count(1);
+				Get_Left_Up_Point();
+				Get_Right_Up_Point();
+				Get_Left_down_Point();
+				Get_Right_down_Point();
+				//四个拐点都存在
+				if(left_up_point!=0 && right_up_point!=0 && left_down_point!=0 && right_down_point!=0){
+//						Buzzer_On_Count(1);
+						Cross_flag=10;
+						left_draw_line(l_border[left_up_point],left_up_point,l_border[left_down_point],left_down_point);
+						right_draw_line(r_border[right_up_point],right_up_point,r_border[right_down_point],right_down_point);}		
+				//右拐的时候 右下拐点先消失
+				else if(left_up_point!=0 && right_up_point!=0 && left_down_point!=0 && right_down_point == 0){
+//						Buzzer_On_Count(1);
+						Cross_flag=11;
+						left_draw_line(l_border[left_up_point],left_up_point,l_border[left_down_point],left_down_point);
+						right_up_point_draw_line(r_border[right_up_point],right_up_point);}								
+				//左拐的时候 左下拐点先消失
+				else if(left_up_point!=0 && right_up_point!=0 && left_down_point == 0 && right_down_point !=0){
+//						Buzzer_On_Count(1);
+						Cross_flag=12;
+						left_up_point_draw_line(l_border[left_up_point],left_up_point); 
+						right_draw_line(r_border[right_up_point],right_up_point,r_border[right_down_point],right_down_point);}		
+				//上两个拐点存在，下两个拐点消失，十字进行中
+				else if(left_up_point!=0 && right_up_point!=0 && left_down_point == 0 && right_down_point ==0){
+//						Buzzer_On_Count(1);
+						Cross_flag=13;
+						left_up_point_draw_line (l_border[left_up_point] ,left_up_point); 
+						right_up_point_draw_line(r_border[right_up_point],right_up_point);}								
+				//四个拐点都消失，出十字
+				else if(left_up_point==0 && right_up_point==0 && left_down_point == 0 && right_down_point ==0){
+//						Buzzer_On_Count(1);
+						Cross_flag=0;
+				}
+				}
+			}
 /*
 函数名称：void image_process(void)
 功能说明：最终处理函数
@@ -783,157 +1070,13 @@ if (get_start_point(image_h - 2))//找到起点了，再执行八领域，没找
 	// 从爬取的边界线内提取边线 ， 这个才是最终有用的边线
 	get_left(data_stastics_l);
 	get_right(data_stastics_r);
+
 	//处理函数放这里，不要放到if外面去了，不要放到if外面去了，不要放到if外面去了，重要的事说三遍
-
+ //myCross_fill();
 }
-
-// ========== 环岛状态机 ==========
-//    static uint8 meetRingFlag = 0, enterRingFlag = 0, leaveRingFlag = 0, ringSide = 0;
-//    uint8 jumpFlagL = 0, jumpFlagR = 0, pointType = 0, pointSide = 0;
-//    uint16 pointX = 0, pointY = 0;
-
-//    for (i = image_h - 2; i > image_h / 3; i--)
-//    {
-//        if (l_border[i + 1] - l_border[i] > 20) // 左A跳变点
-//        {
-//            jumpFlagL = 1;
-//            pointX = l_border[i + 1];
-//            pointY = i + 1;
-//            pointSide = 1;
-//            pointType = 1;
-//        }
-//        else if (l_border[i] - l_border[i + 1] > 20) // 左V跳变点
-//        {
-//            jumpFlagL = 1;
-//            pointX = l_border[i];
-//            pointY = i;
-//            pointSide = 1;
-//            pointType = 2;
-//        }
-
-//        if (r_border[i] - r_border[i + 1] > 20) // 右A跳变点
-//        {
-//            jumpFlagR = 1;
-//            pointX = r_border[i + 1];
-//            pointY = i + 1;
-//            pointSide = 2;
-//            pointType = 1;
-//        }
-//        else if (r_border[i + 1] - r_border[i] > 20) // 右V跳变点
-//        {
-//            jumpFlagR = 1;
-//            pointX = r_border[i];
-//            pointY = i;
-//            pointSide = 2;
-//            pointType = 2;
-//        }
-
-//        if (jumpFlagL ^ jumpFlagR) break;
-//    }
-
-//    // 补线点
-//    uint16 topX = image_w / 2, topY = 0;
-//    uint16 l_bot_x = 0, l_bot_y = image_h - 1;
-//    uint16 r_bot_x = image_w - 1, r_bot_y = image_h - 1;
-//    float stepLength = 0;
-
-//    if (jumpFlagL ^ jumpFlagR)
-//    {
-//        if (pointType == 1) // A字跳变点
-//        {
-//            if (enterRingFlag)
-//            {
-//                leaveRingFlag = 1;
-//                if (ringSide == 1) // 左环补右边
-//                {
-//                    stepLength = (float)(topX - pointX) / (float)(topY - pointY);
-//                    for (i = 0; i < topY - pointY; i++)
-//                    {
-//                        r_border[topY - i] = topX - (int)(i * stepLength);
-//                        bin_image[topY - i][r_border[topY - i]] =
-//                        bin_image[topY - i][r_border[topY - i] - 1] =
-//                        bin_image[topY - i][r_border[topY - i] + 1] = 0;
-//                    }
-//                }
-//                else if (ringSide == 2) // 右环补左边
-//                {
-//                    stepLength = (float)(pointX - topX) / (float)(topY - pointY);
-//                    for (i = 0; i < topY - pointY; i++)
-//                    {
-//                        l_border[topY - i] = topX + (int)(i * stepLength);
-//                        bin_image[topY - i][l_border[topY - i]] =
-//                        bin_image[topY - i][l_border[topY - i] - 1] =
-//                        bin_image[topY - i][l_border[topY - i] + 1] = 0;
-//                    }
-//                }
-//            }
-//            else if (!meetRingFlag)
-//            {
-//                meetRingFlag = 1;
-//                ringSide = pointSide;
-//            }
-//        }
-//        else if (pointType == 2) // V字跳变点
-//        {
-//            if (leaveRingFlag) // 过环
-//            {
-//                meetRingFlag = 0;
-//                enterRingFlag = 0;
-//                leaveRingFlag = 0;
-//                if (ringSide == 1)
-//                {
-//                    stepLength = (float)(pointX - l_bot_x) / (float)(l_bot_y - pointY);
-//                    for (i = 0; i < l_bot_y - pointY; i++)
-//                    {
-//                        l_border[l_bot_y - i] = l_bot_x + (int)(i * stepLength);
-//                        bin_image[l_bot_y - i][l_border[l_bot_y - i]] =
-//                        bin_image[l_bot_y - i][l_border[l_bot_y - i] - 1] =
-//                        bin_image[l_bot_y - i][l_border[l_bot_y - i] + 1] = 0;
-//                    }
-//                }
-//                else if (ringSide == 2)
-//                {
-//                    stepLength = (float)(r_bot_x - pointX) / (float)(r_bot_y - pointY);
-//                    for (i = 0; i < r_bot_y - pointY; i++)
-//                    {
-//                        r_border[r_bot_y - i] = r_bot_x - (int)(i * stepLength);
-//                        bin_image[r_bot_y - i][r_border[r_bot_y - i]] =
-//                        bin_image[r_bot_y - i][r_border[r_bot_y - i] - 1] =
-//                        bin_image[r_bot_y - i][r_border[r_bot_y - i] + 1] = 0;
-//                    }
-//                }
-//            }
-//            else if (meetRingFlag) // 入环
-//{
-//    enterRingFlag = 1;
-
-//    if (ringSide == 1) // 左环：补右边线（右下 → 入环跳变点）
-//    {
-//        stepLength = (float)(r_bot_x - pointX) / (float)(r_bot_y - pointY);
-//        for (i = 0; i < r_bot_y - pointY; i++)
-//        {
-//            r_border[r_bot_y - i] = r_bot_x - (int)(i * stepLength);
-//            bin_image[r_bot_y - i][r_border[r_bot_y - i]] =
-//            bin_image[r_bot_y - i][r_border[r_bot_y - i] - 1] =
-//            bin_image[r_bot_y - i][r_border[r_bot_y - i] + 1] = 0;
-//        }
-//    }
-//    else if (ringSide == 2) // ✅ 右环：应补左边线（左下 → 入环跳变点）
-//    {
-//        stepLength = (float)(pointX - l_bot_x) / (float)(l_bot_y - pointY);
-//        for (i = 0; i < l_bot_y - pointY; i++)
-//        {
-//            l_border[l_bot_y - i] = l_bot_x + (int)(i * stepLength);
-//            bin_image[l_bot_y - i][l_border[l_bot_y - i]] =
-//            bin_image[l_bot_y - i][l_border[l_bot_y - i] - 1] =
-//            bin_image[l_bot_y - i][l_border[l_bot_y - i] + 1] = 0;
-//        }
-//    }
-//}
-//       }
-//    }
+	
 //avoid_obstacle();
-  
+
 
 extern void ips200_displayimage032_zoom(uint8 *img, uint16 src_w, uint16 src_h,
                                         uint16 dst_w, uint16 dst_h, uint16 x, uint16 y);
@@ -948,11 +1091,7 @@ extern void ips200_displayimage032_zoom(uint8 *img, uint16 src_w, uint16 src_h,
         bin_image[i][center_line[i] + 1] = 0;
     }
 
-//    for (i = 0; i < data_stastics_l; i++)
-//        ips200_draw_point(points_l[i][0] + 2, points_l[i][1], RGB565_BLUE);
 
-//    for (i = 0; i < data_stastics_r; i++)
-//        ips200_draw_point(points_r[i][0] - 2, points_r[i][1], RGB565_RED);
 
 //    for (i = hightest; i < image_h - 1; i++)
 //    {

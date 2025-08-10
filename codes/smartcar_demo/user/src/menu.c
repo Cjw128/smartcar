@@ -10,8 +10,8 @@ int menu1(void)
 
     // 初始化显示
     ips200_clear();
-    ips200_show_string(0, 100, "Menu 1: test1");
-    ips200_show_string(0, 120, "Config");
+    ips200_show_string(0, 100, "Config");
+    ips200_show_string(0, 120, "Feedforward");
     ips200_show_string(0, 140, "Start");
 
     while (1)
@@ -67,8 +67,8 @@ int menu2_1(void)
 {
     ips200_clear();
     
-    pit_ms_init(TIM6_PIT, 6); 
-    pit_ms_init(TIM7_PIT, 6);  // 初始化 5ms 周期定时器
+    pit_ms_init(TIM6_PIT, 5); 
+    pit_ms_init(TIM7_PIT, 5);  // 初始化 5ms 周期定时器
     interrupt_set_priority(TIM7_IRQn, 1); // TIM6优先级设为1
     interrupt_set_priority(TIM6_IRQn, 2); // TIM7优先级设为2
 
@@ -141,9 +141,11 @@ param_config_t params = {
     .ki_speed = 0.1f,
     .kd_speed = 0.0f,
     .kd_diff = 0.5f,
+    .kf_speed = 0.0f,
+    .kf_dir = 0.0f
 };
 
-#define PARAM_FLASH_WORD_LEN 8  // 一共 8 个 float 参数
+#define PARAM_FLASH_WORD_LEN 10  // 一共 10 个 float 参数
 
 void param_flash_write(void)
 {
@@ -177,6 +179,8 @@ typedef enum
     PARAM_KP_SPEED,
     PARAM_KI_SPEED,
     PARAM_KD_SPEED,
+    PARAM_KF_SPEED,
+    PARAM_KF_DIR,
     PARAM_TOTAL            // 必须在最后
 } param_index_t;
 
@@ -262,6 +266,72 @@ ips200_clear();
                 case PARAM_KP_SPEED:     params.kp_speed     -= 0.1f; break;
                 case PARAM_KI_SPEED:     params.ki_speed     -= 0.02f; break;
                 case PARAM_KD_SPEED:     params.kd_speed     -= 0.02f; break;
+            }
+            k1 = 0;
+        }
+
+        // KEY4 保存并退出
+        if (k4)
+        {
+            while (key_get_state(KEY_4) != KEY_RELEASE) key_scanner();
+            param_flash_write();  // 写入Flash
+            return 0;             // 返回上一级菜单
+        }
+
+        system_delay_ms(100);
+    }
+}
+int menu_param_feedforward(void)
+{
+    int selected = 0;
+    int k1 = 0, k2 = 0, k3 = 0, k4 = 0;
+    const int FF_PARAM_TOTAL = 2;
+    ips200_clear();
+    while (1)
+    {
+        ips200_show_string(0, 100, "kf_speed     :");
+        ips200_show_float(100, 100, params.kf_speed, 5, 3);
+
+        ips200_show_string(0, 120, "kf_dir       :");
+        ips200_show_float(100, 120, params.kf_dir, 5, 3);
+
+        // 清除箭头区并绘制当前箭头
+        for (int i = 0; i < FF_PARAM_TOTAL; i++)
+            ips200_show_string(180, 100 + i * 20, " ");
+        ips200_show_string(180, 100 + selected * 20, "<");
+
+        key_scanner();
+        if (key_get_state(KEY_1) == KEY_SHORT_PRESS) k1 = 1;
+        if (key_get_state(KEY_2) == KEY_SHORT_PRESS) k2 = 1;
+        if (key_get_state(KEY_3) == KEY_SHORT_PRESS) k3 = 1;
+        if (key_get_state(KEY_4) == KEY_SHORT_PRESS) k4 = 1;
+
+        // KEY2 下移选择
+        if (k2)
+        {
+            selected++;
+            if (selected >= FF_PARAM_TOTAL) selected = 0;
+            k2 = 0;
+        }
+
+        // KEY3 增加参数
+        if (k3)
+        {
+            switch (selected)
+            {
+                case 0: params.kf_speed += 0.01f; break;
+                case 1: params.kf_dir   += 0.01f; break;
+            }
+            k3 = 0;
+        }
+
+        // KEY1 减少参数
+        if (k1)
+        {
+            switch (selected)
+            {
+                case 0: params.kf_speed -= 0.01f; break;
+                case 1: params.kf_dir   -= 0.01f; break;
             }
             k1 = 0;
         }

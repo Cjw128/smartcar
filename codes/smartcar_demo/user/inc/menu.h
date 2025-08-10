@@ -18,6 +18,8 @@ typedef struct
     float ki_speed;
     float kd_speed;
     float kd_diff;
+    float kf_speed;  
+    float kf_dir;    
 } param_config_t;
 
 extern param_config_t params;
@@ -25,5 +27,5 @@ extern param_config_t params;
 void param_flash_write(void);
 void param_flash_read(void);
 int menu_param_config(void);
-
+int menu_param_feedforward(void);
 #endif

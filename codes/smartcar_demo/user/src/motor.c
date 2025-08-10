@@ -119,10 +119,10 @@ int16 unified_speed_pid_control(PID_t *pid, int16 target_speed, int16 left_speed
 void motor_init(void)
 {
     gpio_init(DIR_L, GPO, GPIO_HIGH, GPO_PUSH_PULL);
-    pwm_init(PWM_L, 10000, 0);
+    pwm_init(PWM_L, 17000, 0);
 
     gpio_init(DIR_R, GPO, GPIO_HIGH, GPO_PUSH_PULL);
-    pwm_init(PWM_R, 10000, 0);
+    pwm_init(PWM_R, 17000, 0);
 }
 
 // 初始化编码器
@@ -260,8 +260,6 @@ float last_deviation = 0;
 
 // 主巡线控制函数，计算左右速度目标，调用电机控制
 void line_follow_control(void)
-
-
 {
     if (loss_track(mt9v03x_image))  // 失线保护
     {
@@ -281,49 +279,101 @@ void line_follow_control(void)
  mpu6050_get_gyro();
     float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;
     float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.5f;
-    float deviation = center_weighted_deviation(image_h - 95, image_h - 65);
+    float deviation = center_weighted_deviation(image_h - 90, image_h - 75);
 	float abs_dev = fabsf(deviation);
     float diff = deviation - last_deviation;
     last_deviation = deviation;
- float delta_speed = 
+
+    float steer_feedforward = params.kf_dir * deviation;
+
+    float delta_speed = 
           params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f))
         - params.Kd_dir * gyro_z_dps//*fabs(gyro_z_dps);
-        - params.kd_diff *diff;
-//if (abs_dev < 10.0f)
-//{adaptive_base_speed = params.base_speed * 1.0f;	
+        - params.kd_diff *diff
+        + steer_feedforward;
 
-//}
-//else if (abs_dev < 25.0f)
-//{adaptive_base_speed = params.base_speed * 0.7f;
-//	
-//}
-//	else
-//	{adaptive_base_speed = params.base_speed * 0.6f;
+        if (abs_dev <5.0f)
+{adaptive_base_speed = params.base_speed * 1.0f;	
 
-//	}
- adaptive_base_speed = params.base_speed;
+}
+ else{adaptive_base_speed = params.base_speed;
+ }
     left_target_speed = adaptive_base_speed + delta_speed;
     right_target_speed = adaptive_base_speed - delta_speed;
 
+    float ff_L = params.kf_speed * left_target_speed;
+    float ff_R = params.kf_speed * right_target_speed;
+
     // 使用增量式PID控制
-    int16 duty_L = (int16)pid_increment(&pid_speed_L_inc, left_target_speed, measured_speed_L, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed);
-    int16 duty_R = (int16)pid_increment(&pid_speed_R_inc, right_target_speed, measured_speed_R, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed);
+    int16 duty_L = (int16)pid_increment(&pid_speed_L_inc, left_target_speed, measured_speed_L, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed) + ff_L;
+    int16 duty_R = (int16)pid_increment(&pid_speed_R_inc, right_target_speed, measured_speed_R, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed) + ff_R;
     set_motor_independent(duty_L, duty_R);
-	//printf("%d,%d,%d\n",measured_speed_L,measured_speed_R,left_target_speed);
+	//printf("%d,%d\n",measured_speed_L,measured_speed_R);
 }
 volatile uint8 flag_do_control = 0;
-// PIT定时器中断处理函数，定期更新速度反馈并执行控制
-void pit_handler(void)
+
+
+
+void steering_loop(void)            //转向环控制
+{
+    // 采集传感器、计算偏差
+    float deviation = center_weighted_deviation(image_h - 90, image_h - 75);
+    float diff = deviation - last_deviation;
+    last_deviation = deviation;
+    float gyro_z_raw = -mpu6050_gyro_transition(mpu6050_gyro_z) + OFFSET;
+    float gyro_z_dps = get_filtered_gyro_z(gyro_z_raw) * 0.5f;
+
+    float steer_feedforward = params.kf_dir * deviation;
+    float delta_speed = 
+        params.Kp_dir * deviation * (0.3f + 0.7f * fabsf(deviation) / (image_w / 2.0f))
+        - params.Kd_dir * gyro_z_dps
+        - params.kd_diff * diff
+        + steer_feedforward;
+
+    float abs_dev = fabsf(deviation);
+    if (abs_dev < 5.0f)
+        adaptive_base_speed = params.base_speed * 1.0f;
+    else
+        adaptive_base_speed = params.base_speed;
+
+    left_target_speed = adaptive_base_speed + delta_speed;
+    right_target_speed = adaptive_base_speed - delta_speed;
+}
+
+void speed_loop(void)               //速度环控制
+{
+    if (loss_track(mt9v03x_image))  // 失线保护
+    {
+        set_motor_independent(0, 0);
+				go_on_flag = 0;
+        return;
+    }
+    
+    measured_speed_L = encoder_data_1;
+    measured_speed_R = encoder_data_2;
+
+    float ff_L = params.kf_speed * left_target_speed;
+    float ff_R = params.kf_speed * right_target_speed;
+
+    int16 duty_L = (int16)pid_increment(&pid_speed_L_inc, left_target_speed, measured_speed_L, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed) + ff_L;
+    int16 duty_R = (int16)pid_increment(&pid_speed_R_inc, right_target_speed, measured_speed_R, MAX_DUTY, params.kp_speed, params.ki_speed, params.kd_speed) + ff_R;
+    set_motor_independent(duty_L, duty_R);
+}
+
+
+
+void pit_handler(void)              //速度环中断函数
 {
    
- line_follow_control();
-
+// line_follow_control();
+    speed_loop();
 }
-void encoder_sample_handler(void)
+void encoder_sample_handler(void)   //转向环中断函数
 {
-    encoder_data_1 = encoder_get_count(ENCODER_1);
-    encoder_data_2 = -encoder_get_count(ENCODER_2);
-    encoder_clear_count(ENCODER_1);
-    encoder_clear_count(ENCODER_2);
+    //encoder_data_1 = encoder_get_count(ENCODER_1);
+    //encoder_data_2 = -encoder_get_count(ENCODER_2);
+    //encoder_clear_count(ENCODER_1);
+    //encoder_clear_count(ENCODER_2);
+    steering_loop();
 
 }

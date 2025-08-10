@@ -38,18 +38,18 @@
     //#define ENABLE_IMAGE_DISPLAY 1  // 改成 1 就可以重新开启图像显示                                                                                // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
 
      #include "menu.h"
-		 #include "motor.h"
-		 #include "isr.h"
+	 #include "motor.h"
+	 #include "isr.h"
     volatile uint8 image_ready_flag = 0;
 
 // **************************** 代码区域 ****************************
 
 enum MenuState
 {
-    MENU_MAIN,
-    MENU_2_1,
-    MENU_2_2,
-    MENU_2_3,
+    MENU_MAIN = 1,
+    MENU_PARAM_CONFIG = 2,
+    MENU_2_1 = 3,
+    MENU_FEEDFORWARD = 4,   // 新增前馈参数菜单编号
 };
 
 int main(void)
@@ -63,49 +63,40 @@ int main(void)
 	motor_init();
     encoder_init();
 	pid_speed_init_from_params();
-  param_flash_read();  // 从Flash加载上次保存的参数
-		ips200_set_dir(IPS200_PORTAIT);
+    param_flash_read();  // 从Flash加载上次保存的参数
+	ips200_set_dir(IPS200_PORTAIT);
     ips200_set_color(RGB565_BLACK, RGB565_WHITE);
     ips200_init(IPS200_TYPE_SPI);
 		extern param_config_t params;
 
-    int current_menu = 1;  // 主菜单或初始菜单编号
+    int current_menu = MENU_MAIN;
     int ret;
 
-    	
     while (1)
-    {		
-			
-         switch (current_menu)
+    {
+        switch (current_menu)
         {
-            case 1:
-                // 这里调用普通菜单1
-                current_menu = menu1();  // 你的已有菜单函数
+            case MENU_MAIN:
+                // 你的主菜单逻辑，返回值决定进入哪个菜单
+                current_menu = menu1();  // 例如menu1返回2进入参数菜单，返回4进入前馈菜单
                 break;
 
-            case 2:
-                // 调用参数调节菜单
+            case MENU_PARAM_CONFIG:
                 ret = menu_param_config();
-                // menu_param_config返回0时表示退出到主菜单
                 if (ret == 0)
-                {
-                    current_menu = 1;  // 返回主菜单
-                }
+                    current_menu = MENU_MAIN;
                 break;
 
-            // 其它菜单
-            case 3 :
+            case MENU_2_1:
                 ret = menu2_1();
-						
-					
-					
+                break;
+
+            case MENU_FEEDFORWARD:
+                ret = menu_param_feedforward();  // 调用前馈参数菜单
+                if (ret == 0)
+                    current_menu = MENU_MAIN;
                 break;
         }
-
-				
-    
-
-			
     }
 
 
